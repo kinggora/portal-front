@@ -1,65 +1,77 @@
 <template>
-  <TitleHeader :title="boardInfo.subject" />
-  <v-container>
-    <div class="post-area">
-      <v-row class="mb-2">
-        {{ post.category.name }}
-      </v-row>
-      <v-row class="mb-2">
-        <div class="text-h5">{{ post.title }}</div>
-      </v-row>
-      <v-row>
-        <div class="text-subtitle-1">{{ post.member.name }}</div>
-      </v-row>
-      <v-row justify="space-between">
-        <div style="color: darkgray">
-          {{ post.regDate }}&nbsp;&nbsp;&nbsp;조회수: {{ post.hit }}
-        </div>
-        <div style="color: darkgray">수정 일시: {{ post.modDate }}</div>
-      </v-row>
+  <div>
+    <TitleHeader :title="boardInfo.subject" />
+    <TwoButtonModal
+      v-if="popState"
+      question="게시물을 삭제하시겠습니까?"
+      @sendAnswer="closeDeleteModal"
+      @scroll.prevent
+      @wheel.prevent
+      @touchmove.prevent
+    ></TwoButtonModal>
+    <v-container>
+      <div class="post-area">
+        <v-row class="mb-2">
+          {{ post.category.name }}
+        </v-row>
+        <v-row class="mb-2">
+          <div class="text-h5">{{ post.title }}</div>
+        </v-row>
+        <v-row>
+          <div class="text-subtitle-1">{{ post.member.name }}</div>
+        </v-row>
+        <v-row justify="space-between">
+          <div style="color: darkgray">
+            {{ post.regDate }}&nbsp;&nbsp;&nbsp;조회수: {{ post.hit }}
+          </div>
+          <div style="color: darkgray">수정 일시: {{ post.modDate }}</div>
+        </v-row>
+        <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
+        <v-row>
+          {{ post.content }}
+        </v-row>
+      </div>
+      <div class="file-area">
+        <v-row>첨부 파일</v-row>
+      </div>
       <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
-      <v-row>
-        {{ post.content }}
-      </v-row>
-    </div>
-    <div class="file-area">
-      <v-row>첨부 파일</v-row>
-    </div>
-    <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
-    <div class="reply-area">
-      <v-row>댓글</v-row>
-    </div>
-    <div class="btn-area">
-      <v-row justify="center">
-        <v-btn width="150" color="indigo" @click="moveToList">목록</v-btn>
-        <v-btn
-          class="ml-2 mr-2"
-          width="150"
-          variant="tonal"
-          color="indigo"
-          @click="moveToModify"
-          >수정</v-btn
-        >
-        <v-btn
-          width="150"
-          variant="outlined"
-          color="indigo"
-          @click="openDeletePopup"
-          >삭제</v-btn
-        >
-      </v-row>
-    </div>
-  </v-container>
+      <div class="reply-area">
+        <v-row>댓글</v-row>
+      </div>
+      <div class="btn-area">
+        <v-row justify="center">
+          <v-btn width="150" color="indigo" @click="moveToList">목록</v-btn>
+          <v-btn
+            class="ml-2 mr-2"
+            width="150"
+            variant="tonal"
+            color="indigo"
+            @click="moveToModify"
+            >수정</v-btn
+          >
+          <v-btn
+            width="150"
+            variant="outlined"
+            color="indigo"
+            @click="openDeleteModal"
+            >삭제</v-btn
+          >
+        </v-row>
+      </div>
+    </v-container>
+  </div>
 </template>
 
 <script>
 import TitleHeader from "@/components/TitleHeader.vue";
+import TwoButtonModal from "@/components/TwoButtonModal.vue";
 
 export default {
   name: "FreeDetail",
-  components: { TitleHeader },
+  components: { TwoButtonModal, TitleHeader },
   data() {
     return {
+      popState: false,
       boardInfo: {
         id: 4,
         name: "free",
@@ -91,7 +103,18 @@ export default {
   methods: {
     moveToList() {},
     moveToModify() {},
-    openDeletePopup() {},
+    openDeleteModal() {
+      this.popState = true;
+    },
+    closeDeleteModal(answer) {
+      if (answer) {
+        this.deletePost();
+      }
+      this.popState = false;
+    },
+    deletePost() {
+      console.log("delete...");
+    },
   },
 };
 </script>
