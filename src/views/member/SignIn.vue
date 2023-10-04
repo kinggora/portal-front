@@ -7,7 +7,7 @@
             <v-row>
               <v-text-field
                 label="아이디"
-                :v-model="id"
+                v-model="username"
                 variant="outlined"
               ></v-text-field>
             </v-row>
@@ -15,7 +15,7 @@
               <v-text-field
                 label="비밀번호"
                 type="password"
-                :v-model="password"
+                v-model="password"
                 variant="outlined"
               ></v-text-field>
             </v-row>
@@ -27,8 +27,8 @@
                 color="indigo-darken-4"
                 type="submit"
                 @click="submitForm"
-                >로그인</v-btn
-              >
+                >로그인
+              </v-btn>
             </v-row>
           </v-form>
         </template>
@@ -38,16 +38,43 @@
 </template>
 
 <script>
+import { useStore } from "vuex";
+import router from "@/router";
+
 export default {
-  name: "SignUp",
+  name: "SignIn",
+  setup() {
+    const store = useStore();
+    const setToken = token => store.commit("authStore/setToken", token);
+    const setUsername = username =>
+      store.commit("authStore/setUsername", username);
+    return { setToken, setUsername };
+  },
   data() {
     return {
-      id: "",
+      username: "",
       password: "",
     };
   },
   methods: {
-    submitForm() {},
+    submitForm() {
+      const loginForm = new FormData();
+      loginForm.set("username", this.username);
+      loginForm.set("password", this.password);
+      this.$axios
+        .post("/members/signin", loginForm)
+        .then(res => {
+          console.log(res.data);
+          this.setToken(res.data.data);
+          this.setUsername(this.username);
+          router.push("/");
+        })
+        .catch(e => {
+          console.log(e);
+          this.username = "";
+          this.password = "";
+        });
+    },
   },
 };
 </script>

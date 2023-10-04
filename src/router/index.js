@@ -1,20 +1,51 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import FreeForm from "@/views/free/FreeWrite.vue";
+import FreeList from "@/views/free/FreeList.vue";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import NoMenuLayout from "@/layouts/NoMenuLayout.vue";
+import SignUp from "@/views/member/SignUp.vue";
+import SignIn from "@/views/member/SignIn.vue";
+import FreeDetail from "@/views/free/FreeDetail.vue";
 
 const routes = [
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    name: "defaultLayout",
+    component: DefaultLayout,
+    children: [
+      {
+        path: "/free/write",
+        name: "freeForm",
+        component: FreeForm,
+      },
+      {
+        path: "/free",
+        name: "freeList",
+        component: FreeList,
+      },
+      {
+        path: "/free/:id",
+        name: "freeDetail",
+        component: FreeDetail,
+      },
+    ],
   },
   {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    path: "/",
+    name: "noMenuLayout",
+    component: NoMenuLayout,
+    children: [
+      {
+        path: "/login",
+        name: "login",
+        component: SignIn,
+      },
+      {
+        path: "/signup",
+        name: "SignUp",
+        component: SignUp,
+      },
+    ],
   },
 ];
 

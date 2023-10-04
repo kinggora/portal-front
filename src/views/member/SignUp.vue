@@ -40,8 +40,8 @@
                 color="indigo-darken-4"
                 type="submit"
                 @click="submitForm"
-                >등록</v-btn
-              >
+                >등록
+              </v-btn>
             </v-row>
           </v-form>
         </template>
@@ -52,7 +52,7 @@
 
 <script>
 export default {
-  name: "SignIn",
+  name: "SignUp",
   components: {},
   data() {
     return {
