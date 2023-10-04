@@ -5,7 +5,6 @@ module.exports = defineConfig({
       overlay: false,
     },
   },
-
   outputDir: "../src/main/resources/static",
 
   chainWebpack(config) {
