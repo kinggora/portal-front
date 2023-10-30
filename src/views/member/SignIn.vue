@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import { inject, ref } from "vue";
 import { useStore } from "vuex";
 import router from "@/router";
 
@@ -45,36 +46,28 @@ export default {
   name: "SignIn",
   setup() {
     const store = useStore();
-    const setToken = token => store.commit("authStore/setToken", token);
-    const setUsername = username =>
-      store.commit("authStore/setUsername", username);
-    return { setToken, setUsername };
-  },
-  data() {
-    return {
-      username: "",
-      password: "",
-    };
-  },
-  methods: {
-    submitForm() {
+    const axios = inject("axios");
+    let username = ref("");
+    let password = ref("");
+    const login = tokens => store.dispatch("authStore/login", tokens);
+    const submitForm = () => {
       const loginForm = new FormData();
-      loginForm.set("username", this.username);
-      loginForm.set("password", this.password);
-      this.$axios
+      loginForm.set("username", username.value);
+      loginForm.set("password", password.value);
+      axios
         .post("/members/signin", loginForm)
         .then(res => {
           console.log(res.data);
-          this.setToken(res.data.data);
-          this.setUsername(this.username);
+          login(res.data.data);
           router.push("/");
         })
         .catch(e => {
           console.log(e);
-          this.username = "";
-          this.password = "";
+          username.value = "";
+          password.value = "";
         });
-    },
+    };
+    return { username, password, login, submitForm };
   },
 };
 </script>

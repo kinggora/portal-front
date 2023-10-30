@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useCookies } from "vue3-cookies";
+import * as cookies from "@/utils/CookieService";
 
 const createInstance = () => {
   const axiosInstance = axios.create({
@@ -11,14 +11,16 @@ const createInstance = () => {
 const setInterceptors = instance => {
   instance.interceptors.request.use(
     config => {
-      const { cookies } = useCookies();
-      const accessToken = cookies.get("accessToken");
+      const accessToken = cookies.getAccessToken();
       if (config.headers && accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
     },
-    error => Promise.reject(error),
+    error => {
+      console.log(error);
+      return Promise.reject(error);
+    },
   );
   return instance;
 };

@@ -10,5 +10,3 @@ export default createStore({
     authStore,
   },
 });
-
-export class useStore {}
