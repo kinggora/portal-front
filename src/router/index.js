@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
-import FreeForm from "@/views/free/FreeWrite.vue";
-import FreeList from "@/views/free/FreeList.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import NoMenuLayout from "@/layouts/NoMenuLayout.vue";
 import SignUp from "@/views/member/SignUp.vue";
 import SignIn from "@/views/member/SignIn.vue";
-import FreeDetail from "@/views/free/FreeDetail.vue";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import PostWrite from "@/views/common/PostWrite.vue";
+import PostDetail from "@/views/common/PostDetail.vue";
+import BoardList from "@/views/common/BoardList.vue";
 
 const routes = [
   {
@@ -14,19 +14,22 @@ const routes = [
     component: DefaultLayout,
     children: [
       {
-        path: "/free/write",
-        name: "freeForm",
-        component: FreeForm,
+        path: ":boardName/write",
+        name: "postWrite",
+        component: PostWrite,
+        props: true,
       },
       {
-        path: "/free",
-        name: "freeList",
-        component: FreeList,
+        path: ":boardName",
+        name: "boardList",
+        component: BoardList,
+        props: true,
       },
       {
-        path: "/free/:id",
-        name: "freeDetail",
-        component: FreeDetail,
+        path: ":boardName/:postId",
+        name: "postDetail",
+        component: PostDetail,
+        props: true,
       },
     ],
   },
