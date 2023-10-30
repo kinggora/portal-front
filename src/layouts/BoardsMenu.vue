@@ -5,11 +5,11 @@
         <v-navigation-drawer floating permanent>
           <v-list>
             <v-list-item
-              v-for="menu in menus"
-              :key="menu.id"
+              v-for="(menu, index) in menus"
+              :key="index"
               :value="menu.id"
               :title="menu.subject"
-              @click="moveTo(menu.name)"
+              @click="moveToMenu(menu.name)"
             >
               <template v-slot:prepend>
                 <v-icon :icon="menu.icon"></v-icon>
@@ -28,46 +28,14 @@ import router from "@/router";
 
 export default {
   name: "BoardsMenu",
-  data() {
-    return {
-      menus: [
-        {
-          id: 1,
-          name: "notice",
-          subject: "공지",
-        },
-        {
-          id: 2,
-          name: "news",
-          subject: "뉴스",
-        },
-        {
-          id: 3,
-          name: "dataroom",
-          subject: "자료실",
-        },
-        {
-          id: 4,
-          name: "free",
-          subject: "자유게시판",
-        },
-        {
-          id: 5,
-          name: "gallery",
-          subject: "갤러리",
-        },
-        {
-          id: 6,
-          name: "qna",
-          subject: "Q&A",
-        },
-      ],
+  props: ["menus"],
+  setup() {
+    const moveToMenu = menuName => {
+      router.push({
+        path: `/${menuName}`,
+      });
     };
-  },
-  methods: {
-    moveTo(menuName) {
-      router.push(`/${menuName}`);
-    },
+    return { moveToMenu };
   },
 };
 </script>
