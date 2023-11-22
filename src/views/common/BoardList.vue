@@ -4,49 +4,30 @@
     <SearchBox
       :categories="categories"
       :criteria="criteria"
-      v-on:searchEvent="reload"
+      v-on:searchEvent="search"
     />
-    <v-table style="width: 100%">
-      <thead>
-        <tr>
-          <th class="text-center font-weight-bold">카테고리</th>
-          <th class="text-center font-weight-bold" style="width: 50%">제목</th>
-          <th class="text-center font-weight-bold">작성자</th>
-          <th class="text-center font-weight-bold">조회수</th>
-          <th class="text-center font-weight-bold">등록 일시</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(post, index) in posts" :key="index">
-          <td>{{ post.category.name }}</td>
-          <td class="td-title" style="width: 50%">
-            <a
-              :style="{
-                'text-decoration-line': hoverTitle === index ? 'underline' : '',
-                cursor: 'pointer',
-              }"
-              @click="moveToDetail(post.id)"
-              @mouseover="changeHover(index)"
-              @mouseleave="changeHover(null)"
-            >
-              {{ curtailTitle(post.title) }}</a
-            >
-            <v-icon
-              class="ml-2"
-              v-if="post.attached"
-              icon="mdi-attachment"
-            ></v-icon>
-          </td>
-          <td>{{ post.member.name }}</td>
-          <td>{{ post.hit }}</td>
-          <td>{{ formatDate(post.regDate) }}</td>
-        </tr>
-      </tbody>
-    </v-table>
-    <v-row justify="end">
+    <div class="mb-2">총 {{ pageInfo?.totalCount }}건</div>
+    <div class="list-area">
+      <div v-if="listMode">
+        <PostList :posts="posts" @clickTitle="moveToDetail"></PostList>
+      </div>
+      <div v-else>
+        <GalleryList :posts="posts" @clickItem="moveToDetail"></GalleryList>
+      </div>
+    </div>
+    <div class="text-end">
       <v-btn width="150" color="indigo" @click="moveToWrite">등록</v-btn>
-    </v-row>
+    </div>
+    <div class="page-bar-area">
+      <PaginationBar
+        :page-info="pageInfo"
+        :display-page-count="10"
+        @handlePage="moveToPage"
+      ></PaginationBar>
+    </div>
     {{ $route.query }}
+    {{ posts }}
+    {{ pageInfo }}
   </div>
 </template>
 
@@ -57,25 +38,31 @@ import router from "@/router";
 import { inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import SearchCriteria from "@/model/SearchCriteria";
-import DateFormatter from "@/utils/DateFormatter";
+import PaginationBar from "@/components/PaginationBar.vue";
+import PostList from "@/components/list/PostList.vue";
+import GalleryList from "@/components/list/GalleryList.vue";
 
 export default {
   name: "BoardList",
   props: ["boardName"],
-  components: { SearchBox, TitleHeader },
+  components: {
+    PostList,
+    GalleryList,
+    PaginationBar,
+    SearchBox,
+    TitleHeader,
+  },
   setup(props) {
     const route = useRoute();
     const axios = inject("axios");
-    let boardInfo = ref({});
-    let categories = ref([]);
-    let posts = ref([]);
     let criteria = new SearchCriteria(route.query);
+    let currentPage = route.query.page ? route.query.page : 1;
 
+    let boardInfo = ref({});
     onMounted(() => {
       axios
-        .get(`/info/${props.boardName}`)
+        .get(`/infos/${props.boardName}`)
         .then(res => {
-          console.log(res.data);
           boardInfo.value = res.data.data;
           const boardId = boardInfo.value.id;
           fetchCategories(boardId);
@@ -86,11 +73,11 @@ export default {
         });
     });
 
+    let categories = ref([]);
     const fetchCategories = boardId => {
       axios
-        .get(`/category/${boardId}`)
+        .get(`/categories/${boardId}`)
         .then(res => {
-          console.log(res.data);
           categories.value = res.data.data;
         })
         .catch(e => {
@@ -98,75 +85,90 @@ export default {
         });
     };
 
+    let posts = ref([]);
+    let pageInfo = ref();
     const fetchPosts = boardId => {
-      criteria.boardId = boardId;
+      criteria.setBoardId(boardId);
       axios
         .get("/posts", {
-          params: criteria.getRequestParam(),
+          params: {
+            ...criteria.getRequestParam(),
+            page: currentPage,
+            size: 10,
+          },
         })
         .then(res => {
-          console.log(res.data);
-          posts.value = res.data.data;
+          posts.value = res.data.data.data;
+          pageInfo.value = res.data.data.pageInfo;
         })
         .catch(e => {
-          console.log(e.data);
+          const error = e.response.data;
+          if (error.code === -404 && error.errors.length > 0) {
+            alert(error.errors[0].message);
+          }
         });
     };
 
-    const reload = criteria => {
+    const search = input => {
+      const newCriteria = new SearchCriteria(input);
       router.push({
         path: `/${boardInfo.value.name}`,
-        query: { ...criteria },
+        query: {
+          ...newCriteria.getRequestParam(),
+        },
       });
     };
 
-    return { boardInfo, categories, posts, criteria, reload };
-  },
-  data() {
-    return {
-      hoverTitle: null,
-    };
-  },
-  methods: {
-    moveToDetail(id) {
-      router.push(`/${this.boardInfo.name}/${id}`);
-    },
-    moveToWrite() {
+    const moveToPage = page => {
       router.push({
-        path: `/${this.boardInfo.name}/write`,
-        params: {
-          boardId: this.boardInfo.id,
+        path: `/${boardInfo.value.name}`,
+        query: {
+          ...criteria.getRequestParam(),
+          page: page,
         },
       });
-    },
-    curtailTitle(title) {
-      return title.length > 35 ? title.substring(0, 35) + "..." : title;
-    },
-    changeHover(index) {
-      this.hoverTitle = index;
-    },
-    formatDate(date) {
-      return DateFormatter.dateToString(date);
-    },
+    };
+
+    const moveToDetail = id => {
+      router.push({
+        path: `/${boardInfo.value.name}/${id}`,
+        query: {
+          ...criteria.getRequestParam(),
+          page: currentPage,
+        },
+      });
+    };
+
+    const moveToWrite = () => {
+      router.push({
+        path: `/${boardInfo.value.name}/write`,
+      });
+    };
+
+    let listMode = true;
+    return {
+      boardInfo,
+      categories,
+      posts,
+      pageInfo,
+      criteria,
+      moveToPage,
+      moveToDetail,
+      moveToWrite,
+      listMode,
+      search,
+    };
   },
 };
 </script>
 
 <style scoped>
-v-table {
-  margin-bottom: 100px;
+.list-area {
+  margin-bottom: 20px;
 }
 
-th {
-  text-align: center;
-  font-weight: bold;
-}
-
-td {
-  text-align: center;
-}
-
-.td-title {
-  text-align: left;
+.page-bar-area {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>
