@@ -35,14 +35,14 @@
             item-value="id"
             label="카테고리 선택"
             v-model="searchCriteria.categoryId"
-          ></v-select>
+          >
+          </v-select>
         </v-col>
         <v-col cols="3">
           <v-text-field
             density="compact"
             variant="outlined"
             single-line
-            placeholder="제목/작성자/내용"
             v-model="searchCriteria.searchWord"
           ></v-text-field>
         </v-col>
@@ -55,41 +55,45 @@
 </template>
 
 <script>
+import { ref } from "vue";
+
 export default {
   name: "SearchBox",
-  props: ["categories"],
-  data() {
-    return {
-      minDate: "1970-01-01",
-      maxDate: this.getCurrentDate(),
-      searchCriteria: {
-        startDate: "",
-        endDate: "",
-        categoryId: "",
-        searchWord: "",
-      },
-      rules: {
-        required: v => !!v || "E-mail is required",
-        startDate: [
-          v =>
-            /^\d{4}-\d{2}-\d{2}$/.test(v) || "날짜 형식이 올바르지 않습니다.",
-          v => new Date(v) < new Date(this.searchCriteria.endDate) || "",
-        ],
-        endDate: [
-          v =>
-            /^\d{4}-\d{2}-\d{2}$/.test(v) || "날짜 형식이 올바르지 않습니다.",
-          v => new Date(v) > new Date(this.searchCriteria.startDate) || "",
-        ],
-      },
-    };
-  },
-  methods: {
-    search() {
-      this.$emit("searchEvent", this.searchCriteria);
-    },
-    getCurrentDate() {
+  props: ["categories", "criteria"],
+  emits: ["searchEvent"],
+  setup(props, { emit }) {
+    const minDate = "1970-01-01";
+    const maxDate = () => {
       return new Date().toISOString().split("T")[0];
-    },
+    };
+
+    let searchCriteria = ref({
+      startDate: props.criteria.startDate,
+      endDate: props.criteria.endDate,
+      categoryId: props.criteria.categoryId,
+      searchWord: props.criteria.searchWord,
+    });
+
+    // const rules = [
+    //   required = v => !!v || "E-mail is required",
+    //
+    //     startDate: [
+    //     v =>
+    //       /^\d{4}-\d{2}-\d{2}$/.test(v) || "날짜 형식이 올바르지 않습니다.",
+    //     v => new Date(v) < new Date(searchCriteria.value.endDate) || "",
+    //   ],
+    //     endDate: [
+    //     v =>
+    //       /^\d{4}-\d{2}-\d{2}$/.test(v) || "날짜 형식이 올바르지 않습니다.",
+    //     v => new Date(v) > new Date(searchCriteria.value.startDate) || "",
+    //   ],
+    // },
+
+    const search = () => {
+      emit("searchEvent", searchCriteria.value);
+    };
+
+    return { minDate, maxDate, searchCriteria, search };
   },
 };
 </script>
