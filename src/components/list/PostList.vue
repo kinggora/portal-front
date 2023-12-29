@@ -11,31 +11,30 @@
     </thead>
     <tbody>
       <tr v-for="(post, index) in posts" :key="index">
-        <td>{{ post.category.name }}</td>
+        <td>{{ post.categoryName }}</td>
         <td class="td-title" style="width: 50%">
           <a
             :style="{
               'text-decoration-line': hoverTitle === index ? 'underline' : '',
               cursor: 'pointer',
             }"
-            @click="clickTitle(post.id)"
+            @click="clickTitle(post.postId)"
             @mouseover="changeHover(index)"
             @mouseleave="changeHover(null)"
           >
-            {{ curtailTitle(post.title) }}</a
+            {{ curtailText(post.title) }}</a
           >
+          <v-icon class="ml-2" v-if="post.imaged" icon="mdi-image"></v-icon>
           <v-icon
             class="ml-2"
-            v-if="post.fileInfo.imaged"
-            icon="mdi-image"
-          ></v-icon>
-          <v-icon
-            class="ml-2"
-            v-if="post.fileInfo.attached"
+            v-if="post.attached"
             icon="mdi-attachment"
           ></v-icon>
+          <a v-if="post.commentCount > 0" class="ml-2" style="font-weight: bold"
+            >[{{ post.commentCount }}]</a
+          >
         </td>
-        <td>{{ post.member.name }}</td>
+        <td>{{ post.memberName }}</td>
         <td>{{ post.hit }}</td>
         <td>{{ DateFormatter.dateToString(post.regDate) }}</td>
       </tr>
@@ -62,8 +61,8 @@ export default {
   setup(props, { emit }) {
     let hoverTitle = ref(null);
 
-    const curtailTitle = title => {
-      return title.length > 35 ? title.substring(0, 35) + "..." : title;
+    const curtailText = text => {
+      return text.length > 35 ? text.substring(0, 35) + "..." : text;
     };
 
     const changeHover = index => {
@@ -74,7 +73,7 @@ export default {
       emit("clickTitle", id);
     };
 
-    return { hoverTitle, curtailTitle, changeHover, clickTitle, DateFormatter };
+    return { hoverTitle, curtailText, changeHover, clickTitle, DateFormatter };
   },
 };
 </script>

@@ -15,9 +15,9 @@
   </div>
 </template>
 <script>
-import BoardsFooter from "@/layouts/BoardsFooter.vue";
-import BoardsToolbar from "@/layouts/BoardsToolbar.vue";
-import BoardsMenu from "@/layouts/BoardsMenu.vue";
+import BoardsFooter from "@/components/layout/BoardsFooter.vue";
+import BoardsToolbar from "@/components/layout/BoardsToolbar.vue";
+import BoardsMenu from "@/components/layout/BoardsMenu.vue";
 import { inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
@@ -29,7 +29,7 @@ export default {
     let boardInfos = ref([]);
     onMounted(() => {
       inject("axios")
-        .get("/info")
+        .get("/boards")
         .then(res => {
           console.log(res.data);
           boardInfos.value = res.data.data;
@@ -45,10 +45,11 @@ export default {
 <style scoped>
 .body {
   display: flex;
+  min-height: 1000px;
 }
 
 .content {
   flex: 5;
-  padding: 30px 100px 100px;
+  padding: 30px 10% 30px 5%;
 }
 </style>

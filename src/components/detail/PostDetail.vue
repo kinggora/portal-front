@@ -22,28 +22,21 @@
         </div>
       </div>
       <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
-      <div v-for="(file, index) in contentFiles" :key="index">
-        <img :src="file.storeDir" />
+      <div v-for="(image, index) in images" :key="index">
+        <img :src="image.url" />
       </div>
       <div>
         {{ post.content }}
       </div>
-    </div>
-    <div v-if="attachFiles.length !== 0" class="file-area">
-      <div class="mb-3" style="font-weight: bold">첨부 파일</div>
-      <FileList :files="attachFiles"></FileList>
     </div>
   </div>
 </template>
 
 <script>
 import DateFormatter from "@/utils/DateFormatter";
-import { computed } from "vue";
-import FileList from "@/components/list/FileList.vue";
 
 export default {
   name: "PostDetail",
-  components: { FileList },
   props: {
     post: {
       type: Object,
@@ -52,7 +45,7 @@ export default {
         return {};
       },
     },
-    files: {
+    images: {
       type: Array,
       required: false,
       default: () => {
@@ -60,16 +53,8 @@ export default {
       },
     },
   },
-  setup(props) {
-    const attachFiles = computed(() => {
-      return props.files.filter(file => file.type === "ATTACHMENT");
-    });
-
-    const contentFiles = computed(() => {
-      return props.files.filter(file => file.type === "CONTENT");
-    });
-
-    return { DateFormatter, attachFiles, contentFiles };
+  setup() {
+    return { DateFormatter };
   },
 };
 </script>
@@ -77,10 +62,6 @@ export default {
 <style scoped>
 .post-area {
   margin-top: 20px;
-  margin-bottom: 100px;
-}
-
-.file-area {
   margin-bottom: 100px;
 }
 </style>
