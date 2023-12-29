@@ -22,8 +22,15 @@ export default {
       () => store.state.authStore.isAuthenticated,
     );
     const name = computed(() => store.getters["authStore/getMember"]?.name);
-    const logout = () => store.dispatch("authStore/logout");
-    return { isAuthenticated, name, logout };
+    const logout = () => {
+      store.dispatch("authStore/logout");
+      router.go();
+    };
+
+    const moveToHome = () => {
+      router.push("/");
+    };
+    return { isAuthenticated, name, logout, moveToHome };
   },
   methods: {
     moveToLogin() {

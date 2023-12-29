@@ -6,10 +6,11 @@
           <v-list>
             <v-list-item
               v-for="(menu, index) in menus"
+              :active="menu.id === selected"
               :key="index"
               :value="menu.id"
               :title="menu.subject"
-              @click="moveToMenu(menu.name)"
+              @click="moveToMenu(menu.id, menu.boardType)"
             >
               <template v-slot:prepend>
                 <v-icon :icon="menu.icon"></v-icon>
@@ -25,17 +26,38 @@
 
 <script>
 import router from "@/router";
+import { useRoute } from "vue-router";
+import { computed } from "vue";
 
 export default {
   name: "BoardsMenu",
-  props: ["menus"],
+  props: {
+    menus: {
+      type: Array,
+      required: true,
+      default: () => {
+        return [];
+      },
+    },
+  },
   setup() {
-    const moveToMenu = menuName => {
+    const route = useRoute();
+    let selected = computed(() => {
+      if (route.query.boardId) {
+        return parseInt(route.query.boardId);
+      }
+      return null;
+    });
+    const moveToMenu = (boardId, boardType) => {
       router.push({
-        path: `/${menuName}`,
+        path: `/portal`,
+        query: {
+          boardId: boardId,
+          boardType: boardType,
+        },
       });
     };
-    return { moveToMenu };
+    return { selected, moveToMenu };
   },
 };
 </script>

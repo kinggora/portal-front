@@ -6,14 +6,25 @@
           <tr v-for="(file, index) in files" :key="index">
             <td>{{ file.origName }} ({{ getByteSize(file.size) }})</td>
             <td class="text-right">
-              <v-menu>
+              <v-menu v-if="downloadable">
                 <template v-slot:activator="{ props }">
                   <v-btn
                     variant="plain"
                     icon="mdi-download"
                     size="medium"
                     v-bind="props"
-                    @click="downloadFile(file.id)"
+                    @click="downloadFile(file)"
+                  ></v-btn>
+                </template>
+              </v-menu>
+              <v-menu v-if="deletable">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    variant="plain"
+                    icon="mdi-close-circle-outline"
+                    size="medium"
+                    v-bind="props"
+                    @click="clickDeleteBtn(file)"
                   ></v-btn>
                 </template>
               </v-menu>
@@ -30,14 +41,31 @@ import { inject } from "vue";
 
 export default {
   name: "FileList",
-  props: ["files"],
-  setup() {
+  props: {
+    files: {
+      type: Array,
+      required: true,
+      default: () => {
+        return [];
+      },
+    },
+    downloadable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    deletable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  emits: ["delete"],
+  setup(props, { emit }) {
     const axios = inject("axios");
-    const downloadFile = id => {
+    const downloadFile = file => {
       axios
-        .get(`/files/download/${id}`, {
-          headers: { responseType: "blob" },
-        })
+        .get(`/files/${file.id}/download`, { responseType: "blob" })
         .then(res => {
           const fileName =
             res.headers["content-disposition"].split("filename=")[1];
@@ -48,23 +76,29 @@ export default {
           document.body.appendChild(link);
           link.click();
           link.remove();
+          window.URL.revokeObjectURL(url);
         })
         .catch(e => {
-          console.log(e.data);
+          console.log(e);
+          alert("다운로드가 실패했습니다. 잠시 후 다시 시도해주세요.");
         });
+    };
+
+    const clickDeleteBtn = file => {
+      emit("delete", file);
     };
 
     const getByteSize = size => {
       const byteUnits = ["KB", "MB", "GB", "TB"];
       for (let i = 0; i < byteUnits.length; i++) {
-        size = Math.floor(size / 1024);
+        size = size / 1024;
         if (size < 1024) {
           return size.toFixed(1) + byteUnits[i];
         }
       }
     };
 
-    return { downloadFile, getByteSize };
+    return { downloadFile, clickDeleteBtn, getByteSize };
   },
 };
 </script>
