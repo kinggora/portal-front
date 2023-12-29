@@ -1,5 +1,7 @@
 import axios from "axios";
 import * as cookies from "@/utils/CookieService";
+import store from "@/store";
+import router from "@/router";
 
 const createInstance = () => {
   const axiosInstance = axios.create({
@@ -22,6 +24,26 @@ const setInterceptors = instance => {
       return Promise.reject(error);
     },
   );
+
+  instance.interceptors.response.use(
+    function (response) {
+      return response;
+    },
+    function (error) {
+      if (error.response && error.response.status) {
+        console.log(error.response);
+        switch (error.response.status) {
+          case 401:
+            store.dispatch("authStore/logout").then(() => {
+              router.push("/login").catch(() => {});
+            });
+            break;
+        }
+      }
+      return Promise.reject(error);
+    },
+  );
+
   return instance;
 };
 
