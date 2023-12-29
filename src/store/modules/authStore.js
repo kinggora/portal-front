@@ -4,8 +4,10 @@ import AxiosInstance from "@/utils/AxiosInstance";
 export const authStore = {
   namespaced: true,
   state: {
-    isAuthenticated: false,
+    isAuthenticated: !!cookies.getAccessToken(),
     member: {},
+    accessToken: cookies.getAccessToken(),
+    refreshToken: cookies.getRefreshToken(),
   },
   getters: {
     isAuthenticated(state) {
@@ -27,9 +29,10 @@ export const authStore = {
       state.member.id = payload.id;
       state.member.username = payload.username;
       state.member.name = payload.name;
-      state.member.role = payload.role;
+      state.member.roles = payload.roles;
     },
     setAuthenticated(state, status) {
+      console.log("setAuthenticated", status);
       state.isAuthenticated = status;
     },
     resetState(state) {
@@ -58,8 +61,8 @@ export const authStore = {
           commit("setAuthenticated", true);
           commit("setMember", res.data.data);
         })
-        .catch(e => {
-          console.log(e);
+        .catch(() => {
+          commit("resetState");
         });
     },
   },
