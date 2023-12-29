@@ -1,13 +1,16 @@
 export default class SearchCriteria {
-  //page;
   boardId;
+  boardType;
   categoryId;
   searchWord;
   startDate;
   endDate;
+  page;
 
   constructor(object) {
-    //this.page = query.page;
+    this.boardId = object.boardId;
+    this.page = object.page ? object.page : 1;
+    this.boardType = object.boardType;
     this.categoryId = object.categoryId
       ? parseInt(object.categoryId)
       : object.categoryId;
@@ -16,22 +19,31 @@ export default class SearchCriteria {
     this.endDate = object.endDate;
   }
 
-  // setPage(page) {
-  //   this.page = page;
-  // }
+  setBoardType(boardType) {
+    this.boardType = boardType;
+  }
 
   setBoardId(boardId) {
     this.boardId = boardId;
   }
 
+  setPage(page) {
+    this.page = page;
+  }
+
+  setSearchEvent(input) {
+    this.page = 1;
+    this.categoryId = input.categoryId;
+    if (input.searchWord) {
+      this.searchWord = input.searchWord.trim();
+    }
+    this.startDate = input.startDate;
+    this.endDate = input.endDate;
+  }
+
   getRequestParam() {
     let criteria = {};
-    // if (this.page) {
-    //   criteria.page = this.page;
-    // }
-    if (this.boardId) {
-      criteria.boardId = this.boardId;
-    }
+    criteria.boardType = this.boardType;
     if (this.categoryId) {
       criteria.categoryId = this.categoryId;
     }
@@ -44,6 +56,18 @@ export default class SearchCriteria {
     if (this.endDate) {
       criteria.endDate = this.endDate;
     }
+    if (this.page) {
+      criteria.page = this.page;
+    } else {
+      criteria.page = 1;
+    }
     return criteria;
+  }
+
+  getQueryParam() {
+    return {
+      boardId: this.boardId,
+      ...this.getRequestParam(),
+    };
   }
 }
