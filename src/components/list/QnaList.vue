@@ -12,28 +12,29 @@
     </thead>
     <tbody>
       <tr v-for="(post, index) in posts" :key="index">
-        <td>{{ post.category.name }}</td>
+c        <td>{{ post.categoryName }}</td>
         <td class="td-title" style="width: 40%">
           <a
             :style="{
               'text-decoration-line': hoverTitle === index ? 'underline' : '',
               cursor: 'pointer',
             }"
-            @click="clickTitle(post.id)"
+            @click="clickTitle(post.postId)"
             @mouseover="changeHover(index)"
             @mouseleave="changeHover(null)"
           >
             {{ curtailTitle(post.title) }}</a
           >
+          <v-icon class="ml-2" icon="mdi-lock" v-if="post.secret" />
         </td>
-        <td>{{ post.member.name }}</td>
+        <td>{{ post.memberName }}</td>
         <td>
           <v-icon
             icon="mdi-check-circle"
             color="success"
-            v-if="post.existsChild"
+            v-if="post.childExists"
           />
-          <v-icon icon="mdi-circle-slice-1" v-if="!post.existsChild" />
+          <v-icon icon="mdi-circle-slice-1" v-if="!post.childExists" />
         </td>
         <td>{{ DateFormatter.dateToString(post.regDate) }}</td>
         <td>
