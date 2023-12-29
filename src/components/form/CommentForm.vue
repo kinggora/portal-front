@@ -14,7 +14,9 @@
       compact
     >
       <div class="card-text">
-        {{ member.name || "name" }}
+        <div v-if="name">
+          {{ name }}
+        </div>
         <v-textarea
           v-model="content"
           variant="underlined"
@@ -31,7 +33,7 @@
             v-if="cancellable"
             width="80"
             height="30"
-            variant="tonal"
+            variant="outlined"
             @click="cancel"
             >취소
           </v-btn>
@@ -50,7 +52,6 @@
 </template>
 
 <script>
-import { useStore } from "vuex";
 import { ref } from "vue";
 import OneButtonModal from "@/components/modal/OneButtonModal.vue";
 
@@ -58,23 +59,28 @@ export default {
   name: "CommentForm",
   components: { OneButtonModal },
   props: {
+    name: {
+      type: String,
+      required: false,
+    },
     text: {
       type: String,
+      required: false,
       default: "",
     },
     cancellable: {
       type: Boolean,
+      required: false,
       default: false,
     },
     placeHold: {
       type: String,
+      required: false,
       default: "",
     },
   },
   emits: ["submit"],
   setup(props, { emit }) {
-    const store = useStore();
-    const member = store.getters["authStore/getMember"];
     let content = ref(props.text);
 
     let dialog = ref(false);
@@ -111,7 +117,6 @@ export default {
 
     return {
       content,
-      member,
       rules,
       dialog,
       dialogMessage,

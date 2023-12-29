@@ -6,94 +6,28 @@
           <!-- 댓글 리스트 -->
           <template v-for="(comment, index) in comments" :key="index">
             <!-- 댓글 -->
-            <tr v-if="modifyTarget !== comment.id" class="list-area">
-              <td :style="{ 'padding-left': `${comment.depth * 5}%` }">
-                <div class="list-item">
-                  <div style="font-weight: bold">
-                    {{ comment.member.name }}
-                  </div>
-                  <div>
-                    {{
-                      comment.delFlag ? "삭제된 댓글입니다." : comment.content
-                    }}
-                  </div>
-                  <div style="color: darkgray">
-                    {{ DateFormatter.dateToString(comment.regDate) }}
-                    <a
-                      class="ml-2"
-                      style="cursor: pointer"
-                      @click="setParentId(comment.id)"
-                      >답글 달기</a
-                    >
-                  </div>
-                </div>
-              </td>
-              <!-- 댓글 메뉴 버튼 (수정, 삭제) -->
-              <td class="menu-btn">
-                <v-menu v-if="visibleMenu(comment.id, comment.member)">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      variant="plain"
-                      icon="mdi-dots-vertical"
-                      size="x-small"
-                      height="50"
-                      v-bind="props"
-                    ></v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-if="!comment.delFlag"
-                      @click="setModifyTarget(comment.id)"
-                      >수정
-                    </v-list-item>
-                    <v-list-item @click="deleteComment(comment.id)"
-                      >삭제
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </td>
-            </tr>
-            <!-- 댓글 수정 폼 -->
-            <tr v-if="modifyTarget === comment.id">
-              <td
-                colspan="100%"
-                :style="{ 'padding-left': `${comment.depth * 5}%` }"
-              >
-                <div class="form-area">
-                  <CommentForm
-                    :text="comment.content"
-                    :cancellable="true"
-                    @submit="modifyComment"
-                    @cancel="setModifyTarget(null)"
-                  ></CommentForm>
-                </div>
-              </td>
-            </tr>
-            <!-- 답글 입력 폼 -->
-            <tr v-if="parentId === comment.id">
-              <td
-                colspan="100%"
-                :style="{ 'padding-left': `${(comment.depth + 1) * 5}%` }"
-              >
-                <div class="form-area">
-                  <CommentForm
-                    :cancellable="true"
-                    :placeHold="`${comment.member.name} 님에게 답글 달기`"
-                    @submit="submitChildComment"
-                    @cancel="setParentId(null)"
-                  ></CommentForm>
-                </div>
-              </td>
-            </tr>
+            <CommentDetail
+              :comment="comment"
+              @reply="submitReply"
+              @modify="modifyComment"
+              @delete="deleteComment"
+            ></CommentDetail>
           </template>
           <!-- 댓글 입력 폼 -->
           <tr>
-            <td colspan="100%">
+            <td v-if="isAuthenticated" colspan="100%">
               <div class="form-area">
                 <CommentForm
+                  :name="member.name"
                   placehold="댓글을 남겨보세요"
                   v-on:submit="submitComment"
                 ></CommentForm>
+              </div>
+            </td>
+            <td v-else>
+              <div class="d-flex" @click="moveToLogin">
+                <div>로그인 후 댓글에 참여해보세요</div>
+                <v-icon icon="mdi-chevron-right"></v-icon>
               </div>
             </td>
           </tr>
@@ -105,94 +39,72 @@
 
 <script>
 import { useStore } from "vuex";
-import { computed, inject, onMounted, ref } from "vue";
+import { inject } from "vue";
 import CommentForm from "@/components/form/CommentForm.vue";
 import DateFormatter from "../../utils/DateFormatter";
+import { useRouter } from "vue-router";
+import CommentDetail from "@/components/detail/CommentDetail.vue";
 
 export default {
   name: "CommentList",
-  components: { CommentForm },
-  props: ["postId"],
-  setup(props) {
+  components: { CommentDetail, CommentForm },
+  props: {
+    postId: {
+      type: Number,
+      required: true,
+      default: null,
+    },
+    comments: {
+      type: Array,
+      required: false,
+      default: () => {
+        return [];
+      },
+    },
+  },
+  setup(props, { emit }) {
     const store = useStore();
-    const loggedInMember = computed(() => {
-      if (store.getters["authStore/isAuthenticated"]) {
-        return store.getters["authStore/getMember"];
-      }
-      return null;
-    });
+    const isAuthenticated = store.getters["authStore/isAuthenticated"];
+    const member = store.getters["authStore/getMember"];
 
     const axios = inject("axios");
-    let comments = ref([]);
-    onMounted(() => {
-      loadComments();
-    });
-
-    const loadComments = () => {
-      axios
-        .get(`/comments/${props.postId}`)
-        .then(res => {
-          console.log(res.data);
-          comments.value = res.data.data;
-        })
-        .catch(e => {
-          console.log(e.data);
-        });
-    };
 
     const submitComment = content => {
       const form = new FormData();
-      form.set("postId", props.postId);
       form.set("content", content);
       axios
-        .post("/comments", form)
+        .post(`/posts/${props.postId}/comments`, form)
+        .then(() => {
+          emit("reloadComments");
+        })
+        .catch(e => {
+          console.log(e);
+          alert("댓글 등록에 실패했습니다.");
+        });
+    };
+
+    const submitReply = (parentId, content) => {
+      const form = new FormData();
+      form.set("content", content);
+      axios
+        .post(`/posts/${props.postId}/comments/${parentId}/replies`, form)
         .then(res => {
           console.log(res.data);
-          loadComments();
+          emit("reloadComments");
         })
         .catch(e => {
           console.log(e.data);
         });
     };
 
-    let parentId = ref(null);
-    const setParentId = parentId => {
-      console.log(parentId);
-      parentId.value = parentId;
-    };
-
-    const submitChildComment = content => {
+    const modifyComment = (id, content) => {
       const form = new FormData();
-      form.set("postId", props.postId);
       form.set("content", content);
-      form.set("parent", parentId.value);
-      parentId.value = null;
       axios
-        .post("/comments", form)
+        .put(`/comments/${id}`, form)
         .then(res => {
           console.log(res.data);
-          loadComments();
-        })
-        .catch(e => {
-          console.log(e.data);
-        });
-    };
-
-    let modifyTarget = ref(null);
-    const setModifyTarget = id => {
-      modifyTarget.value = id;
-    };
-
-    const modifyComment = content => {
-      const form = new FormData();
-      form.set("id", modifyTarget.value);
-      form.set("content", content);
-      modifyTarget.value = null;
-      axios
-        .put("/comments", form)
-        .then(res => {
-          console.log(res.data);
-          loadComments();
+          emit("reloadComments");
         })
         .catch(e => {
           console.log(e.data);
@@ -204,32 +116,28 @@ export default {
         .delete(`/comments/${id}`)
         .then(res => {
           console.log(res.data);
-          loadComments();
+          emit("reloadComments");
         })
         .catch(e => {
           console.log(e.data);
         });
     };
 
-    const visibleMenu = (id, writer) => {
-      return (
-        loggedInMember.value !== null &&
-        loggedInMember.value.username === writer.username &&
-        modifyTarget.value !== id
-      );
+    let router = useRouter();
+    const moveToLogin = () => {
+      router.push({
+        path: `/login`,
+      });
     };
 
     return {
-      comments,
-      modifyTarget,
-      parentId,
+      member,
+      moveToLogin,
       submitComment,
-      submitChildComment,
+      submitReply,
       modifyComment,
       deleteComment,
-      setModifyTarget,
-      setParentId,
-      visibleMenu,
+      isAuthenticated,
       DateFormatter,
     };
   },
@@ -237,22 +145,7 @@ export default {
 </script>
 
 <style scoped>
-.list-item {
-  padding-top: 15px;
-  padding-bottom: 15px;
-  padding-left: 30px;
-}
-
 .form-area {
   padding: 15px;
-}
-
-.list-area {
-  background-color: #fafafa;
-}
-
-.menu-btn {
-  vertical-align: top;
-  text-align: right;
 }
 </style>
