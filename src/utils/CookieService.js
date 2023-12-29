@@ -8,10 +8,8 @@ function addCookie(key, value) {
   cookies.set(key, value);
 }
 
-function removeCookies(...keys) {
-  for (let key in keys) {
-    cookies.remove(key);
-  }
+function removeCookies(key) {
+  cookies.remove(key);
 }
 
 function addAccessToken(token) {

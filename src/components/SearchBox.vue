@@ -63,9 +63,7 @@ export default {
   emits: ["searchEvent"],
   setup(props, { emit }) {
     const minDate = "1970-01-01";
-    const maxDate = () => {
-      return new Date().toISOString().split("T")[0];
-    };
+    const maxDate = new Date().toISOString().split("T")[0];
 
     let searchCriteria = ref({
       startDate: props.criteria.startDate,
