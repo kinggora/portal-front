@@ -1,39 +1,37 @@
 <template>
-  <div>
-    <v-card>
-      <v-table>
-        <tbody>
-          <tr v-for="(file, index) in files" :key="index">
-            <td>{{ file.origName }} ({{ getByteSize(file.size) }})</td>
-            <td class="text-right">
-              <v-menu v-if="downloadable">
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    variant="plain"
-                    icon="mdi-download"
-                    size="medium"
-                    v-bind="props"
-                    @click="downloadFile(file)"
-                  ></v-btn>
-                </template>
-              </v-menu>
-              <v-menu v-if="deletable">
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    variant="plain"
-                    icon="mdi-close-circle-outline"
-                    size="medium"
-                    v-bind="props"
-                    @click="clickDeleteBtn(file)"
-                  ></v-btn>
-                </template>
-              </v-menu>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-card>
-  </div>
+  <v-card>
+    <v-table>
+      <tbody>
+        <tr v-for="(file, index) in files" :key="index">
+          <td>{{ file.origName }} ({{ getByteSize(file.size) }})</td>
+          <td class="text-right">
+            <v-menu v-if="downloadable">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  variant="plain"
+                  icon="mdi-download"
+                  size="medium"
+                  v-bind="props"
+                  @click="downloadFile(file)"
+                ></v-btn>
+              </template>
+            </v-menu>
+            <v-menu v-if="deletable">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  variant="plain"
+                  icon="mdi-close-circle-outline"
+                  size="medium"
+                  v-bind="props"
+                  @click="clickDeleteBtn(index)"
+                ></v-btn>
+              </template>
+            </v-menu>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
+  </v-card>
 </template>
 
 <script>
@@ -84,8 +82,8 @@ export default {
         });
     };
 
-    const clickDeleteBtn = file => {
-      emit("delete", file);
+    const clickDeleteBtn = index => {
+      emit("delete", index);
     };
 
     const getByteSize = size => {
