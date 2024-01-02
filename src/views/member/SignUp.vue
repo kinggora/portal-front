@@ -10,26 +10,27 @@
             <v-row>
               <v-text-field
                 label="아이디"
-                :v-model="id"
+                v-model="input.username"
                 variant="outlined"
-                :hint="hint.id"
+                :rules="rules.username"
               ></v-text-field>
             </v-row>
             <v-row>
               <v-text-field
                 label="비밀번호"
                 type="password"
-                :v-model="password"
+                v-model="input.password"
                 variant="outlined"
-                :hint="hint.password"
+                :rules="rules.password"
+                autoComplete="off"
               ></v-text-field>
             </v-row>
             <v-row>
               <v-text-field
                 label="닉네임"
-                :hint="hint.nickname"
-                :v-model="nickname"
+                v-model="input.name"
                 variant="outlined"
+                :rules="rules.name"
               ></v-text-field>
             </v-row>
             <v-row class="d-flex">
@@ -39,7 +40,7 @@
                 height="60"
                 color="indigo-darken-4"
                 type="submit"
-                @click="submitForm"
+                @click="clickSubmitBtn"
                 >등록
               </v-btn>
             </v-row>
@@ -51,24 +52,100 @@
 </template>
 
 <script>
+import { inject, ref } from "vue";
+import router from "@/router";
+
 export default {
   name: "SignUp",
   components: {},
-  data() {
-    return {
-      id: "",
+  setup() {
+    const axios = inject("axios");
+    let input = ref({
+      username: "",
       password: "",
-      nickname: "",
-      hint: {
-        id: "영문/숫자 4자 이상 12자 미만으로 입력해주세요.",
-        password:
-          "영문/숫자/특수문자 포함하여 8자 이상 16자 미만으로 입력해주세요.",
-        nickname: "3글자 이상 5글자 미만으로 입력해주세요.",
+      name: "",
+    });
+
+    const pattern = {
+      username: {
+        regex: /^[a-z]{1}[a-z0-9]{5,9}$/,
+        hint: "영문/숫자 6-10자리로 입력해주세요.",
+      },
+      password: {
+        regex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,20}$/,
+        hint: "영문/숫자/특수문자 8-20자리로 입력해주세요.",
+      },
+      name: {
+        regex: /^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$/,
+        hint: "한글/영문/숫자 2-10자리로 입력해주세요.",
       },
     };
-  },
-  methods: {
-    submitForm() {},
+
+    const rules = {
+      username: [
+        v => !!v || "아이디를 입력해주세요.",
+        v => pattern.username.regex.test(v) || pattern.username.hint,
+      ],
+      password: [
+        v => !!v || "비밀번호를 입력해주세요.",
+        v => pattern.password.regex.test(v) || pattern.password.hint,
+      ],
+      name: [
+        v => !!v || "닉네임을 입력해주세요.",
+        v => pattern.name.regex.test(v) || pattern.name.hint,
+      ],
+    };
+
+    const validateInput = () => {
+      for (let rule of rules.username) {
+        if (rule(input.value.username) !== true) {
+          console.log(rule(input.value.username));
+          return false;
+        }
+      }
+      for (let rule of rules.password) {
+        if (rule(input.value.password) !== true) {
+          return false;
+        }
+      }
+      for (let rule of rules.name) {
+        if (rule(input.value.name) !== true) {
+          return false;
+        }
+      }
+      return true;
+    };
+    const clickSubmitBtn = () => {
+      if (validateInput()) {
+        submitForm();
+      }
+    };
+    const submitForm = () => {
+      const form = new FormData();
+      form.set("username", input.value.username);
+      form.set("password", input.value.password);
+      form.set("name", input.value.name);
+      axios
+        .post("/members", form)
+        .then(() => {
+          alert("회원 등록을 성공했습니다. 로그인 페이지로 이동합니다.");
+          moveToLogin();
+        })
+        .catch(e => {
+          if (e.response.data && e.response.data.message) {
+            alert(e.response.data.message);
+          } else {
+            alert("회원 등록을 실패했습니다. 잠시 후 다시 시도해주세요.");
+          }
+        });
+
+      const moveToLogin = () => {
+        router.push({
+          path: "/login",
+        });
+      };
+    };
+    return { input, rules, clickSubmitBtn };
   },
 };
 </script>

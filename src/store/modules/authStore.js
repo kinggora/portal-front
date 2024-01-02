@@ -43,9 +43,10 @@ export const authStore = {
     },
   },
   actions: {
-    login({ dispatch }, tokens) {
+    login({ dispatch, commit }, tokens) {
       cookies.addAccessToken(tokens.accessToken);
       cookies.addRefreshToken(tokens.refreshToken);
+      commit("setAuthenticated", true);
       dispatch("fetchMember");
     },
     logout({ commit }) {
@@ -58,7 +59,6 @@ export const authStore = {
       AxiosInstance.get("/members")
         .then(res => {
           console.log(res.data);
-          commit("setAuthenticated", true);
           commit("setMember", res.data.data);
         })
         .catch(() => {
