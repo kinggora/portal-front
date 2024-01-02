@@ -3,7 +3,8 @@
     <v-toolbar title="Portal" color="indigo">
       <div v-if="isAuthenticated">{{ name }} 님</div>
       <v-btn v-if="!isAuthenticated" @click="moveToLogin">LOGIN</v-btn>
-      <v-btn v-if="!isAuthenticated" @click="moveToSignup">SIGNUP</v-btn>
+      <v-btn v-if="!isAuthenticated" @click="moveToSignUp">SIGNUP</v-btn>
+      <v-btn v-if="isAuthenticated" @click="moveToMyPage">MYPAGE</v-btn>
       <v-btn v-if="isAuthenticated" @click="logout">LOGOUT</v-btn>
     </v-toolbar>
   </div>
@@ -30,15 +31,26 @@ export default {
     const moveToHome = () => {
       router.push("/");
     };
-    return { isAuthenticated, name, logout, moveToHome };
-  },
-  methods: {
-    moveToLogin() {
+
+    const moveToLogin = () => {
       router.push("/login");
-    },
-    moveToSignup() {
+    };
+    const moveToSignUp = () => {
       router.push("/signup");
-    },
+    };
+
+    const moveToMyPage = () => {
+      router.push("/mypage");
+    };
+    return {
+      isAuthenticated,
+      name,
+      logout,
+      moveToHome,
+      moveToLogin,
+      moveToSignUp,
+      moveToMyPage,
+    };
   },
 };
 </script>

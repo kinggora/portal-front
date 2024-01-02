@@ -7,6 +7,7 @@ import BoardDetail from "@/views/boards/BoardDetail.vue";
 import BoardList from "@/views/boards/BoardList.vue";
 import store from "@/store";
 import SignIn from "@/views/member/SignIn.vue";
+import MyPage from "@/views/member/MyPage.vue";
 
 const routes = [
   {
@@ -63,6 +64,23 @@ const routes = [
         path: "signup",
         name: "SignUp",
         component: SignUp,
+      },
+      {
+        path: "mypage",
+        name: "MyPage",
+        component: MyPage,
+        beforeEnter: (to, from, next) => {
+          if (!store.getters["authStore/isAuthenticated"]) {
+            next({
+              path: "/login",
+              query: {
+                returnUrl: to.fullPath,
+              },
+            });
+          } else {
+            next();
+          }
+        },
       },
     ],
   },
