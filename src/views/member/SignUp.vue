@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-container class="d-flex align-center flex-column">
-      <v-card class="pa-9 m-3" width="600" color="indigo" variant="tonal">
+    <div class="container">
+      <v-card class="card-area" width="600" color="indigo" variant="tonal">
         <template v-slot:text>
           <v-row class="mb-5" align="center" justify="center">
             <v-card-title class="pa-3"><h2>회원 등록</h2></v-card-title>
@@ -40,6 +40,7 @@
                 height="60"
                 color="indigo-darken-4"
                 type="submit"
+                :loading="isLoading"
                 @click="clickSubmitBtn"
                 >등록
               </v-btn>
@@ -47,7 +48,7 @@
           </v-form>
         </template>
       </v-card>
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -69,7 +70,7 @@ export default {
     const pattern = {
       username: {
         regex: /^[a-z]{1}[a-z0-9]{5,9}$/,
-        hint: "영문/숫자 6-10자리로 입력해주세요.",
+        hint: "영문 소문자/숫자 6-10자리로 입력해주세요.",
       },
       password: {
         regex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,20}$/,
@@ -84,6 +85,7 @@ export default {
     const rules = {
       username: [
         v => !!v || "아이디를 입력해주세요.",
+        v => !/^\d.*/.test(v) || "아이디는 숫자로 시작할 수 없습니다.",
         v => pattern.username.regex.test(v) || pattern.username.hint,
       ],
       password: [
@@ -99,17 +101,19 @@ export default {
     const validateInput = () => {
       for (let rule of rules.username) {
         if (rule(input.value.username) !== true) {
-          console.log(rule(input.value.username));
+          alert(rule(input.value.username));
           return false;
         }
       }
       for (let rule of rules.password) {
         if (rule(input.value.password) !== true) {
+          alert(rule(input.value.password));
           return false;
         }
       }
       for (let rule of rules.name) {
         if (rule(input.value.name) !== true) {
+          alert(rule(input.value.name));
           return false;
         }
       }
@@ -121,6 +125,7 @@ export default {
       }
     };
     const submitForm = () => {
+      startLoading();
       const form = new FormData();
       form.set("username", input.value.username);
       form.set("password", input.value.password);
@@ -137,6 +142,9 @@ export default {
           } else {
             alert("회원 등록을 실패했습니다. 잠시 후 다시 시도해주세요.");
           }
+        })
+        .finally(() => {
+          endLoading();
         });
 
       const moveToLogin = () => {
@@ -145,7 +153,17 @@ export default {
         });
       };
     };
-    return { input, rules, clickSubmitBtn };
+
+    let isLoading = ref(false);
+    const startLoading = () => {
+      isLoading.value = true;
+    };
+
+    const endLoading = () => {
+      isLoading.value = false;
+    };
+
+    return { input, rules, isLoading, clickSubmitBtn };
   },
 };
 </script>
@@ -153,5 +171,16 @@ export default {
 .v-text-field {
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.container {
+  height: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-area {
+  padding: 30px;
 }
 </style>

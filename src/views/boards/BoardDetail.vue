@@ -1,12 +1,6 @@
 <template>
   <div>
     <TitleHeader :title="boardInfo.subject"></TitleHeader>
-    <v-dialog max-width="500" v-model="deleteDialog">
-      <TwoButtonModal
-        question="게시물을 삭제하시겠습니까?"
-        @sendAnswer="closeDeleteModal"
-      ></TwoButtonModal>
-    </v-dialog>
     <div>
       <PostDetail :post="post" :images="contentFiles"></PostDetail>
     </div>
@@ -41,14 +35,23 @@
           @click="moveToModify"
           >수정
         </v-btn>
-        <v-btn
-          v-if="writerMode"
-          width="100"
-          variant="outlined"
-          color="indigo"
-          @click="deleteDialog = true"
-          >삭제
-        </v-btn>
+        <v-dialog v-model="deleteDialog" persistent width="500" color="indigo">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              v-bind="props"
+              v-if="writerMode"
+              width="100"
+              variant="outlined"
+              color="indigo"
+              @click="openDeleteDialog"
+              >삭제
+            </v-btn>
+          </template>
+          <TwoButtonModal
+            question="정말 삭제하시겠습니까?"
+            @sendAnswer="closeDeleteDialog"
+          ></TwoButtonModal>
+        </v-dialog>
       </div>
     </div>
     <!-- 답글 등록 -->
@@ -136,7 +139,7 @@ export default {
     }
     let writerId = post.member["username"];
     let loggedInId = store.getters["authStore/getMember"]["username"];
-    if (writerId === loggedInId) {
+    if (writerId === loggedInId || store.getters["authStore/isAdmin"]) {
       return next();
     }
     alert("비밀글은 작성자만 열람 가능합니다.");
@@ -167,7 +170,6 @@ export default {
     });
 
     const fetchFiles = () => {
-      console.log("fetchFile");
       axios
         .get(`/posts/${post.value.id}/files`)
         .then(res => {
@@ -179,7 +181,6 @@ export default {
     };
 
     const fetchComments = () => {
-      console.log("fetchComment");
       axios
         .get(`/posts/${post.value.id}/comments`)
         .then(res => {
@@ -190,7 +191,6 @@ export default {
         });
     };
     const fetchReplies = () => {
-      console.log("fetchReplies");
       axios
         .get(`/posts/${post.value.id}/replies`)
         .then(res => {
@@ -230,27 +230,44 @@ export default {
     });
 
     let adminMode = computed(() => {
-      return loggedInMember.value["roles"].find(role => role === "ADMIN");
+      return store.getters["authStore/isAdmin"];
     });
 
     let deleteDialog = ref(false);
-    const closeDeleteModal = answer => {
+    const closeDeleteDialog = answer => {
       deleteDialog.value = false;
       if (answer) {
         deletePost();
       }
     };
+    const openDeleteDialog = () => {
+      if (!isProcessing) {
+        deleteDialog.value = true;
+      }
+    };
 
     let openAnswerForm = ref(false);
 
+    let isProcessing = false;
+    const startProcessing = () => {
+      isProcessing = true;
+    };
+    const endProcessing = () => {
+      isProcessing = false;
+    };
+
     const deletePost = () => {
+      startProcessing();
       axios
         .delete(`/posts/${post.value.id}`)
         .then(() => {
           moveToList();
         })
-        .catch(e => {
-          console.log(e);
+        .catch(() => {
+          alert("게시물 삭제를 실패했습니다.");
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
@@ -265,9 +282,15 @@ export default {
     };
 
     const submitReply = input => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       const form = new FormData();
       form.set("title", input.title);
       form.set("content", input.content);
+      form.set("categoryId", post.value.category.id);
+      form.set("secret", post.value.secret);
       axios
         .post(`/posts/${post.value.id}/replies`, form)
         .then(() => {
@@ -275,20 +298,32 @@ export default {
         })
         .catch(e => {
           console.log(e);
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
     const modifyReply = (replyId, input) => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       const form = new FormData();
       form.set("title", input.title);
       form.set("content", input.content);
+      form.set("categoryId", post.value.category.id);
+      form.set("secret", post.value.secret);
       axios
-        .put(`/posts/${replyId}`, form)
+        .patch(`/posts/${replyId}`, form)
         .then(() => {
           router.go();
         })
         .catch(e => {
           console.log(e);
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
@@ -306,7 +341,8 @@ export default {
       fetchComments,
       moveToList,
       moveToModify,
-      closeDeleteModal,
+      openDeleteDialog,
+      closeDeleteDialog,
       submitReply,
       modifyReply,
     };

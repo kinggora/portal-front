@@ -61,9 +61,20 @@ export default {
   emits: ["delete"],
   setup(props, { emit }) {
     const axios = inject("axios");
+    let isProcessing = false;
+    const startProcessing = () => {
+      isProcessing = true;
+    };
+    const endProcessing = () => {
+      isProcessing = false;
+    };
     const downloadFile = file => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       axios
-        .get(`/files/${file.id}/download`, { responseType: "blob" })
+        .get(`/download/${file.id}`, { responseType: "blob" })
         .then(res => {
           const fileName =
             res.headers["content-disposition"].split("filename=")[1];
@@ -79,6 +90,9 @@ export default {
         .catch(e => {
           console.log(e);
           alert("다운로드가 실패했습니다. 잠시 후 다시 시도해주세요.");
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 

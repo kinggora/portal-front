@@ -41,7 +41,6 @@
 import { useStore } from "vuex";
 import { inject } from "vue";
 import CommentForm from "@/components/form/CommentForm.vue";
-import DateFormatter from "../../utils/DateFormatter";
 import { useRouter } from "vue-router";
 import CommentDetail from "@/components/detail/CommentDetail.vue";
 
@@ -69,7 +68,19 @@ export default {
 
     const axios = inject("axios");
 
+    let isProcessing = false;
+    const startProcessing = () => {
+      isProcessing = true;
+    };
+    const endProcessing = () => {
+      isProcessing = false;
+    };
+
     const submitComment = content => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       const form = new FormData();
       form.set("content", content);
       axios
@@ -80,10 +91,17 @@ export default {
         .catch(e => {
           console.log(e);
           alert("댓글 등록에 실패했습니다.");
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
     const submitReply = (parentId, content) => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       const form = new FormData();
       form.set("content", content);
       axios
@@ -94,24 +112,38 @@ export default {
         })
         .catch(e => {
           console.log(e.data);
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
     const modifyComment = (id, content) => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       const form = new FormData();
       form.set("content", content);
       axios
-        .put(`/comments/${id}`, form)
+        .patch(`/comments/${id}`, form)
         .then(res => {
           console.log(res.data);
           emit("reloadComments");
         })
         .catch(e => {
           console.log(e.data);
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
     const deleteComment = id => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
       axios
         .delete(`/comments/${id}`)
         .then(res => {
@@ -120,6 +152,9 @@ export default {
         })
         .catch(e => {
           console.log(e.data);
+        })
+        .finally(() => {
+          endProcessing();
         });
     };
 
@@ -138,7 +173,6 @@ export default {
       modifyComment,
       deleteComment,
       isAuthenticated,
-      DateFormatter,
     };
   },
 };
