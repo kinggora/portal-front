@@ -36,7 +36,7 @@
         </td>
         <td>{{ post.memberName }}</td>
         <td>{{ post.hit }}</td>
-        <td>{{ DateFormatter.dateToString(post.regDate) }}</td>
+        <td>{{ DateUtil.dateTimeToString(post.regDate) }}</td>
       </tr>
     </tbody>
   </v-table>
@@ -44,7 +44,8 @@
 
 <script>
 import { ref } from "vue";
-import DateFormatter from "../../utils/DateFormatter";
+import DateUtil from "../../utils/DateUtil";
+import ByteUtil from "@/utils/ByteUtil";
 
 export default {
   name: "PostList",
@@ -62,7 +63,7 @@ export default {
     let hoverTitle = ref(null);
 
     const curtailText = text => {
-      return text.length > 35 ? text.substring(0, 35) + "..." : text;
+      return ByteUtil.curtailTextInBytes(text, 90);
     };
 
     const changeHover = index => {
@@ -73,7 +74,7 @@ export default {
       emit("clickTitle", id);
     };
 
-    return { hoverTitle, curtailText, changeHover, clickTitle, DateFormatter };
+    return { hoverTitle, curtailText, changeHover, clickTitle, DateUtil };
   },
 };
 </script>

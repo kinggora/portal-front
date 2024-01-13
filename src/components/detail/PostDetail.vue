@@ -12,13 +12,11 @@
       </div>
       <div class="d-flex justify-space-between">
         <div style="color: darkgray">
-          {{
-            DateFormatter.dateToString(post.regDate)
-          }}&nbsp;&nbsp;&nbsp;조회수:
+          {{ DateUtil.dateTimeToString(post.regDate) }}&nbsp;&nbsp;&nbsp;조회수:
           {{ post.hit }}
         </div>
         <div v-if="post.modDate" style="color: darkgray">
-          수정 일시: {{ DateFormatter.dateToString(post.modDate) }}
+          수정 일시: {{ DateUtil.dateTimeToString(post.modDate) }}
         </div>
       </div>
       <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
@@ -33,7 +31,7 @@
 </template>
 
 <script>
-import DateFormatter from "@/utils/DateFormatter";
+import DateUtil from "@/utils/DateUtil";
 
 export default {
   name: "PostDetail",
@@ -54,7 +52,7 @@ export default {
     },
   },
   setup() {
-    return { DateFormatter };
+    return { DateUtil };
   },
 };
 </script>

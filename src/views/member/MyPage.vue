@@ -36,7 +36,7 @@
             <v-dialog
               v-model="passwordDialog"
               persistent
-              width="1024"
+              width="700"
               color="indigo"
             >
               <template v-slot:activator="{ props }">
@@ -55,8 +55,8 @@
                 </v-card-title>
                 <v-card-item class="dialog-item-area">
                   <v-row>
-                    <v-col cols="2" class="mt-3">기존 비밀번호</v-col>
-                    <v-col cols="5" class="d-flex align-center">
+                    <v-col cols="3" class="mt-3">기존 비밀번호</v-col>
+                    <v-col cols="9" class="d-flex align-center">
                       <v-text-field
                         type="password"
                         v-model="input.currentPassword"
@@ -66,8 +66,8 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                    <v-col cols="2" class="mt-3">새 비밀번호</v-col>
-                    <v-col cols="5" class="d-flex align-center">
+                    <v-col cols="3" class="mt-3">새 비밀번호</v-col>
+                    <v-col cols="9" class="d-flex align-center">
                       <v-text-field
                         type="password"
                         v-model="input.newPassword"
@@ -79,8 +79,8 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                    <v-col cols="2" class="mt-3">새 비밀번호 확인</v-col>
-                    <v-col cols="5" class="d-flex align-center">
+                    <v-col cols="3" class="mt-3">새 비밀번호 확인</v-col>
+                    <v-col cols="9" class="d-flex align-center">
                       <v-text-field
                         type="password"
                         v-model="input.newPassword2"
@@ -113,11 +113,25 @@
           </v-row>
         </v-card-text>
         <v-card-item class="justify-end">
-          <v-btn variant="tonal">회원 탈퇴</v-btn>
+          <v-dialog
+            v-model="withdrawDialog"
+            persistent
+            width="700"
+            color="indigo"
+          >
+            <template v-slot:activator="{ props }">
+              <v-btn variant="tonal" v-bind="props" @click="openWithdrawDialog"
+                >회원 탈퇴
+              </v-btn>
+            </template>
+            <TwoButtonModal
+              question="정말 탈퇴하시겠습니까?"
+              @sendAnswer="closeWithdrawDialog"
+            ></TwoButtonModal>
+          </v-dialog>
         </v-card-item>
       </v-card>
     </v-container>
-    {{ input.name }}
   </div>
 </template>
 
@@ -125,10 +139,11 @@
 import store from "@/store";
 import { inject, watch, ref } from "vue";
 import router from "@/router";
+import TwoButtonModal from "@/components/modal/TwoButtonModal.vue";
 
 export default {
   name: "MyPage",
-  components: {},
+  components: { TwoButtonModal },
   setup() {
     let member = store.getters["authStore/getMember"];
     const axios = inject("axios");
@@ -152,6 +167,17 @@ export default {
     };
     let closePasswordDialog = () => {
       passwordDialog.value = false;
+    };
+
+    let withdrawDialog = ref(false);
+    let openWithdrawDialog = () => {
+      withdrawDialog.value = true;
+    };
+    let closeWithdrawDialog = answer => {
+      withdrawDialog.value = false;
+      if (answer) {
+        deleteMember();
+      }
     };
 
     const pattern = {
@@ -221,11 +247,15 @@ export default {
     };
 
     const clickModifyNameBtn = () => {
+      if (isProcessing) {
+        return;
+      }
       if (validateName()) {
+        startProcessing();
         const form = new FormData();
         form.set("name", input.value.name);
         axios
-          .put("/members", form)
+          .patch("/members", form)
           .then(() => {
             alert("닉네임 변경을 완료했습니다.");
             router.go();
@@ -236,12 +266,19 @@ export default {
             } else {
               alert("닉네임 변경을 실패했습니다. 잠시 후 다시 시도해주세요.");
             }
+          })
+          .finally(() => {
+            endProcessing();
           });
       }
     };
 
     const clickModifyPasswordBtn = () => {
+      if (isProcessing) {
+        return;
+      }
       if (validatePassword()) {
+        startProcessing();
         const form = new FormData();
         form.set("currentPassword", input.value.currentPassword);
         form.set("newPassword", input.value.newPassword);
@@ -257,19 +294,57 @@ export default {
             } else {
               alert("비밀번호 변경을 실패했습니다. 잠시 후 다시 시도해주세요.");
             }
+          })
+          .finally(() => {
+            endProcessing();
           });
       }
     };
+
+    const deleteMember = () => {
+      if (isProcessing) {
+        return;
+      }
+      startProcessing();
+      axios
+        .delete("/members")
+        .then(() => {
+          alert("회원 탈퇴되었습니다.");
+        })
+        .catch(e => {
+          if (e.response.data && e.response.data.message) {
+            alert(e.response.data.message);
+          } else {
+            alert("회원 탈퇴를 실패했습니다. 잠시 후 다시 시도해주세요.");
+          }
+        })
+        .finally(() => {
+          endProcessing();
+        });
+    };
+
+    let isProcessing = false;
+    const startProcessing = () => {
+      isProcessing = true;
+    };
+
+    const endProcessing = () => {
+      isProcessing = false;
+    };
+
     return {
       member,
       input,
       pattern,
       rules,
       passwordDialog,
+      withdrawDialog,
       clickModifyNameBtn,
       clickModifyPasswordBtn,
       openPasswordDialog,
       closePasswordDialog,
+      openWithdrawDialog,
+      closeWithdrawDialog,
     };
   },
 };

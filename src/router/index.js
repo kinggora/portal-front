@@ -8,13 +8,29 @@ import BoardList from "@/views/boards/BoardList.vue";
 import store from "@/store";
 import SignIn from "@/views/member/SignIn.vue";
 import MyPage from "@/views/member/MyPage.vue";
+import MainHome from "@/views/boards/MainHome.vue";
 
 const routes = [
   {
     path: "/",
     name: "defaultLayout",
     component: DefaultLayout,
+    beforeEnter: (to, from, next) => {
+      store
+        .dispatch("boardInfoStore/fetchBoardInfos")
+        .then(() => {
+          next();
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
     children: [
+      {
+        path: "",
+        name: "MainHome",
+        component: MainHome,
+      },
       {
         path: "portal",
         name: "boardList",
@@ -112,6 +128,23 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+router.beforeEach((to, from, next) => {
+  if (to.name === "boardList" || to.name === "boardWrite") {
+    if (to.query.boardId) {
+      store
+        .dispatch("boardInfoStore/fetchBoardInfo", to.query.boardId)
+        .then(() => {
+          let boardInfo = store.getters["boardInfoStore/getBoardInfo"];
+          let permission = to.meta["permission"];
+          const accessLevel = boardInfo[permission];
+          authorizationAccess(accessLevel, to, next);
+        });
+    }
+  } else {
+    next();
+  }
+});
+
 /**
  * 접근 권한 검사 : 게시글 상세 (boardDetail)
  * 게시글 정보에서 접근 레벨 확인 -> 사용자 정보와 비교
@@ -122,6 +155,8 @@ router.beforeEach((to, from, next) => {
       let post = store.getters["postStore/getPost"];
       let permission = to.meta["permission"];
       const accessLevel = post.boardInfo[permission];
+      console.log(post);
+      console.log(permission);
       authorizationAccess(accessLevel, to, next);
     });
   } else {
