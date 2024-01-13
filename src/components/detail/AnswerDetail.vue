@@ -6,7 +6,7 @@
         <div>관리자</div>
         <div>
           답변 일시
-          {{ DateFormatter.dateToString(post.regDate) }}
+          {{ DateUtil.dateTimeToString(post.regDate) }}
         </div>
       </div>
     </v-card-title>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import DateFormatter from "@/utils/DateFormatter";
+import DateUtil from "@/utils/DateUtil";
 
 export default {
   name: "AnswerDetail",
@@ -33,7 +33,7 @@ export default {
     },
   },
   setup() {
-    return { DateFormatter };
+    return { DateUtil };
   },
 };
 </script>

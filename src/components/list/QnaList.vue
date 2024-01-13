@@ -12,7 +12,7 @@
     </thead>
     <tbody>
       <tr v-for="(post, index) in posts" :key="index">
-c        <td>{{ post.categoryName }}</td>
+        <td>{{ post.categoryName }}</td>
         <td class="td-title" style="width: 40%">
           <a
             :style="{
@@ -36,9 +36,9 @@ c        <td>{{ post.categoryName }}</td>
           />
           <v-icon icon="mdi-circle-slice-1" v-if="!post.childExists" />
         </td>
-        <td>{{ DateFormatter.dateToString(post.regDate) }}</td>
+        <td>{{ DateUtil.dateTimeToString(post.regDate) }}</td>
         <td>
-          {{ post.modDate ? DateFormatter.dateToString(post.modDate) : "-" }}
+          {{ post.modDate ? DateUtil.dateTimeToString(post.modDate) : "-" }}
         </td>
       </tr>
     </tbody>
@@ -47,7 +47,8 @@ c        <td>{{ post.categoryName }}</td>
 
 <script>
 import { ref } from "vue";
-import DateFormatter from "@/utils/DateFormatter";
+import DateUtil from "@/utils/DateUtil";
+import ByteUtil from "@/utils/ByteUtil";
 
 export default {
   name: "QnaList",
@@ -65,7 +66,7 @@ export default {
     let hoverTitle = ref(null);
 
     const curtailTitle = title => {
-      return title.length > 35 ? title.substring(0, 35) + "..." : title;
+      return ByteUtil.curtailTextInBytes(title, 90);
     };
 
     const changeHover = index => {
@@ -76,7 +77,7 @@ export default {
       emit("clickTitle", id);
     };
 
-    return { hoverTitle, curtailTitle, changeHover, clickTitle, DateFormatter };
+    return { hoverTitle, curtailTitle, changeHover, clickTitle, DateUtil };
   },
 };
 </script>

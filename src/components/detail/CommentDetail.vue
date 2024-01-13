@@ -13,7 +13,7 @@
           {{ comment.content }}
         </div>
         <div style="color: darkgray">
-          {{ DateFormatter.dateToString(comment.regDate) }}
+          {{ DateUtil.dateTimeToString(comment.regDate) }}
           <a class="ml-2" style="cursor: pointer" @click="setReplyMode(true)"
             >답글 달기</a
           >
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import DateFormatter from "../../utils/DateFormatter";
+import DateUtil from "../../utils/DateUtil";
 import { computed, ref } from "vue";
 import store from "@/store";
 import CommentForm from "@/components/form/CommentForm.vue";
@@ -118,7 +118,7 @@ export default {
     };
 
     return {
-      DateFormatter,
+      DateUtil,
       modifyMode,
       replyMode,
       visibleMenu,
