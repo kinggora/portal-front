@@ -8,12 +8,12 @@
 export default {
   name: "TitleHeader",
   props: {
-    title: String,
+    title: {
+      type: String,
+      required: true,
+      default: "",
+    },
   },
 };
 </script>
-<style scoped>
-div {
-  margin-bottom: 30px;
-}
-</style>
+<style scoped></style>

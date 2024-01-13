@@ -1,11 +1,16 @@
 <template>
   <div>
-    <v-toolbar title="Portal" color="indigo">
-      <div v-if="isAuthenticated">{{ name }} 님</div>
-      <v-btn v-if="!isAuthenticated" @click="moveToLogin">LOGIN</v-btn>
-      <v-btn v-if="!isAuthenticated" @click="moveToSignUp">SIGNUP</v-btn>
-      <v-btn v-if="isAuthenticated" @click="moveToMyPage">MYPAGE</v-btn>
-      <v-btn v-if="isAuthenticated" @click="logout">LOGOUT</v-btn>
+    <v-toolbar color="indigo">
+      <v-toolbar-title @click="moveToHome">Portal</v-toolbar-title>
+      <div v-if="isAuthenticated">
+        {{ name }} 님
+        <v-btn v-if="isAuthenticated" @click="moveToMyPage">MYPAGE</v-btn>
+        <v-btn v-if="isAuthenticated" @click="logout">LOGOUT</v-btn>
+      </div>
+      <div v-else>
+        <v-btn v-if="!isAuthenticated" @click="moveToLogin">LOGIN</v-btn>
+        <v-btn v-if="!isAuthenticated" @click="moveToSignUp">SIGNUP</v-btn>
+      </div>
     </v-toolbar>
   </div>
 </template>
