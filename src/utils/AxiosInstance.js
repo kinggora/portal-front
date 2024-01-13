@@ -38,6 +38,13 @@ const setInterceptors = instance => {
               router.push("/login").catch(() => {});
             });
             break;
+          case 403:
+            if (store.getters["authStore/isAuthenticated"]) {
+              alert("권한이 없습니다.");
+            } else {
+              router.push("/login").catch(() => {});
+            }
+            break;
         }
       }
       return Promise.reject(error);

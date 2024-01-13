@@ -22,6 +22,16 @@ export const authStore = {
     getMember(state) {
       return state.member;
     },
+    isAdmin(state) {
+      if (state.member.roles) {
+        for (let role of state.member.roles) {
+          if (role === "ADMIN") {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
   },
   mutations: {
     setMember(state, payload) {
