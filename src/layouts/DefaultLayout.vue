@@ -18,8 +18,9 @@
 import BoardsFooter from "@/components/layout/BoardsFooter.vue";
 import BoardsToolbar from "@/components/layout/BoardsToolbar.vue";
 import BoardsMenu from "@/components/layout/BoardsMenu.vue";
-import { inject, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import store from "@/store";
 
 export default {
   name: "DefaultLayout",
@@ -28,15 +29,7 @@ export default {
     const route = useRoute();
     let boardInfos = ref([]);
     onMounted(() => {
-      inject("axios")
-        .get("/boards")
-        .then(res => {
-          console.log(res.data);
-          boardInfos.value = res.data.data;
-        })
-        .catch(e => {
-          console.log(e);
-        });
+      boardInfos.value = store.getters["boardInfoStore/getBoardInfos"];
     });
     return { route, boardInfos };
   },
@@ -50,6 +43,6 @@ export default {
 
 .content {
   flex: 5;
-  padding: 30px 10% 30px 5%;
+  padding: 30px 5% 30px 5%;
 }
 </style>

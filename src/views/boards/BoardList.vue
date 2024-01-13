@@ -1,22 +1,24 @@
 <template>
   <div>
-    <TitleHeader :title="boardInfo.subject" href="" />
     <SearchBox
       :categories="categories"
       :criteria="criteria"
       v-on:searchEvent="clickSearchBtn"
     />
-    <div class="mb-2">총 {{ pageInfo.totalCount }}건</div>
     <div class="list-area">
       <div v-if="criteria.boardType === 'Q'">
+        <div class="mb-2">총 {{ pageInfo.totalCount }}건</div>
         <QnaList :posts="posts" @clickTitle="moveToDetail"></QnaList>
       </div>
       <div v-else>
-        <div class="text-end mb-2">
-          <BoardTypeConverter
-            :currentBoardType="criteria.boardType"
-            @convertType="convertBoardType"
-          ></BoardTypeConverter>
+        <div class="d-flex justify-space-between mb-2">
+          <div class="text-left mt-2">총 {{ pageInfo.totalCount }}건</div>
+          <div class="text-right">
+            <BoardTypeConverter
+              :currentBoardType="criteria.boardType"
+              @convertType="convertBoardType"
+            ></BoardTypeConverter>
+          </div>
         </div>
         <div v-if="criteria.boardType === 'I'">
           <GalleryList :posts="posts" @clickItem="moveToDetail"></GalleryList>
@@ -26,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="text-end">
+    <div class="text-right">
       <v-btn
         v-if="authorization(boardInfo.accessWrite)"
         width="150"
@@ -46,7 +48,6 @@
 </template>
 
 <script>
-import TitleHeader from "@/components/TitleHeader.vue";
 import SearchBox from "@/components/SearchBox.vue";
 import router from "@/router";
 import { inject, onMounted, ref } from "vue";
@@ -69,7 +70,6 @@ export default {
     PostList,
     PaginationBar,
     SearchBox,
-    TitleHeader,
   },
   setup() {
     const route = useRoute();
