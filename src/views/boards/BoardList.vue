@@ -116,8 +116,8 @@ export default {
           },
         })
         .then(res => {
-          posts.value = res.data.data.data;
-          pageInfo.value = res.data.data.pageInfo;
+          posts.value = res.data.data;
+          pageInfo.value = res.data.pageInfo;
         })
         .catch(e => {
           const error = e.response.data;

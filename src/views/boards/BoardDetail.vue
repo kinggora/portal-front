@@ -74,29 +74,27 @@
     </div>
     <!-- 답글 상세 -->
     <div v-if="authorization(boardInfo.accessReplyRead) && post.childExists">
-      <div v-for="(reply, index) in replies" :key="index">
-        <div v-if="!openAnswerForm">
-          <div class="reply-area">
-            <AnswerDetail :post="reply"></AnswerDetail>
-          </div>
-          <div class="text-end">
-            <v-btn
-              v-if="authorization(boardInfo.accessReplyWrite)"
-              width="100"
-              variant="tonal"
-              color="indigo"
-              @click="openAnswerForm = true"
-              >수정
-            </v-btn>
-          </div>
+      <div v-if="!openAnswerForm">
+        <div class="reply-area">
+          <AnswerDetail :post="reply"></AnswerDetail>
         </div>
-        <div v-else>
-          <AnswerForm
-            :initialData="reply"
-            @submit="modifyReply"
-            @cancel="openAnswerForm = false"
-          ></AnswerForm>
+        <div class="text-end">
+          <v-btn
+            v-if="authorization(boardInfo.accessReplyWrite)"
+            width="100"
+            variant="tonal"
+            color="indigo"
+            @click="openAnswerForm = true"
+            >수정
+          </v-btn>
         </div>
+      </div>
+      <div v-else>
+        <AnswerForm
+          :initialData="reply"
+          @submit="modifyReply"
+          @cancel="openAnswerForm = false"
+        ></AnswerForm>
       </div>
     </div>
   </div>
@@ -152,7 +150,7 @@ export default {
     let files = ref([]);
     let boardInfo = ref({});
     let comments = ref([]);
-    let replies = ref([]);
+    let reply = ref({});
 
     onMounted(() => {
       post.value = store.getters["postStore/getPost"];
@@ -165,7 +163,7 @@ export default {
         fetchComments();
       }
       if (post.value.childExists) {
-        fetchReplies();
+        fetchReply();
       }
     });
 
@@ -190,11 +188,12 @@ export default {
           console.log(e);
         });
     };
-    const fetchReplies = () => {
+    const fetchReply = () => {
       axios
         .get(`/posts/${post.value.id}/replies`)
         .then(res => {
-          replies.value = res.data.data;
+          console.log(res.data);
+          reply.value = res.data.data;
         })
         .catch(e => {
           console.log(e);
@@ -333,7 +332,7 @@ export default {
       boardInfo,
       post,
       comments,
-      replies,
+      reply,
       attachFiles,
       contentFiles,
       writerMode,

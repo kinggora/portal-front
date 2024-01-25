@@ -23,9 +23,7 @@
       <div v-for="(image, index) in images" :key="index">
         <img :src="image.url" />
       </div>
-      <div>
-        {{ post.content }}
-      </div>
+      <div v-text="post.content" style="white-space: pre-line"></div>
     </div>
   </div>
 </template>

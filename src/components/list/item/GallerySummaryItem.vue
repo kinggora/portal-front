@@ -5,7 +5,7 @@
     <v-card-item>
       <div class="text-caption" style="font-weight: bold">
         <a>{{ curtailText(post.title) }}</a>
-        <a v-if="post.commentCount > 0" class="ml-2"
+        <a v-if="post.commentCount > 0" class="ml-1"
           >[{{ post.commentCount }}]</a
         >
       </div>

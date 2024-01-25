@@ -73,6 +73,7 @@ export default {
           },
         })
         .then(res => {
+          console.log(res.data);
           list.value.push({
             id: null,
             title: "WEEKLY BEST: 조회수",
@@ -98,7 +99,7 @@ export default {
             id: boardInfo.id,
             title: boardInfo.subject,
             type: boardInfo.boardType,
-            posts: res.data.data.data,
+            posts: res.data.data,
           });
         })
         .catch(e => {

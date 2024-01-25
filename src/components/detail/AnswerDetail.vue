@@ -11,9 +11,7 @@
       </div>
     </v-card-title>
     <v-card-text class="content-area">
-      <div class="text-h6">
-        {{ post.content }}
-      </div>
+      <div v-text="post.content" style="white-space: pre-line"></div>
     </v-card-text>
   </v-card>
 </template>

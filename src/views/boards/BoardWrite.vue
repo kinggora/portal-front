@@ -15,7 +15,7 @@
                 :rules="rules.categoryId"
               ></v-select>
             </v-col>
-            <v-col v-if="boardInfo.secret">
+            <v-col v-if="boardInfo.allowSecret">
               <v-checkbox v-model="input.secret" label="비밀글"></v-checkbox>
             </v-col>
           </v-row>
@@ -36,6 +36,7 @@
                 row-height="25"
                 v-model="input.content"
                 :rules="rules.content"
+                spellcheck="false"
               ></v-textarea>
             </v-col>
           </v-row>
@@ -64,8 +65,8 @@
               >취소
             </v-btn>
             <v-btn width="150" color="indigo" @click="clickSubmitBtn"
-              >등록</v-btn
-            >
+              >등록
+            </v-btn>
           </v-row>
         </v-form>
       </div>
