@@ -130,7 +130,7 @@ export default {
   beforeRouteEnter: (to, from, next) => {
     let post = store.getters["postStore/getPost"];
     if (post == null) {
-      return next("/");
+      return;
     }
     if (!post.secret) {
       return next();

@@ -21,7 +21,11 @@
       </div>
       <v-divider class="mt-6 mb-12" thickness="2"></v-divider>
       <div v-for="(image, index) in images" :key="index">
-        <img :src="image.url" />
+        <img
+          class="mb-2"
+          :src="image.url"
+          style="max-width: 100%; height: auto"
+        />
       </div>
       <div v-text="post.content" style="white-space: pre-line"></div>
     </div>

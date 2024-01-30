@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card>
-      <v-table>
+      <v-table style="word-break: break-all">
         <tbody>
           <!-- 댓글 리스트 -->
           <template v-for="(comment, index) in comments" :key="index">
@@ -89,8 +89,15 @@ export default {
           emit("reloadComments");
         })
         .catch(e => {
-          console.log(e);
-          alert("댓글 등록에 실패했습니다.");
+          if (
+            e.response.status === 400 &&
+            e.response.data &&
+            e.response.data.message
+          ) {
+            alert(e.response.data.message);
+          } else {
+            alert("댓글 작성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+          }
         })
         .finally(() => {
           endProcessing();
@@ -111,7 +118,15 @@ export default {
           emit("reloadComments");
         })
         .catch(e => {
-          console.log(e.data);
+          if (
+            e.response.status === 400 &&
+            e.response.data &&
+            e.response.data.message
+          ) {
+            alert(e.response.data.message);
+          } else {
+            alert("댓글 작성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+          }
         })
         .finally(() => {
           endProcessing();

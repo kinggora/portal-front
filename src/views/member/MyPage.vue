@@ -1,365 +1,272 @@
 <template>
-  <div>
-    <v-container class="d-flex flex-column align-center">
-      <v-card class="card-area" width="1000" color="indigo" variant="tonal">
-        <v-card-title class="text-center text-h4 font-weight-bold"
-          >MY PAGE
-        </v-card-title>
-        <v-card-text class="mb-4">
-          <v-row>
-            <v-col cols="1"> 아이디</v-col>
-            <v-col cols="2">
-              {{ member.username }}
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="1" class="mt-3">닉네임</v-col>
-            <v-col cols="5" class="d-flex align-center">
-              <v-text-field
-                v-model="input.name"
-                variant="outlined"
-                :hint="pattern.name.hint"
-                density="compact"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="2">
-              <v-btn
-                variant="outlined"
-                height="40px"
-                :disabled="input.name === member.name"
-                @click="clickModifyNameBtn"
-                >변경
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-dialog
-              v-model="passwordDialog"
-              persistent
-              width="700"
-              color="indigo"
-            >
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  class="ml-2"
-                  color="indigo-darken-3"
-                  variant="flat"
-                  v-bind="props"
-                  @click="openPasswordDialog"
-                  >비밀번호 변경
-                </v-btn>
-              </template>
-              <v-card class="card-area">
-                <v-card-title class="text-center text-h5 font-weight-bold"
-                  >비밀번호 변경
-                </v-card-title>
-                <v-card-item class="dialog-item-area">
-                  <v-row>
-                    <v-col cols="3" class="mt-3">기존 비밀번호</v-col>
-                    <v-col cols="9" class="d-flex align-center">
-                      <v-text-field
-                        type="password"
-                        v-model="input.currentPassword"
-                        variant="outlined"
-                        density="compact"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="3" class="mt-3">새 비밀번호</v-col>
-                    <v-col cols="9" class="d-flex align-center">
-                      <v-text-field
-                        type="password"
-                        v-model="input.newPassword"
-                        variant="outlined"
-                        :hint="pattern.newPassword.hint"
-                        persistent-hint
-                        density="compact"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="3" class="mt-3">새 비밀번호 확인</v-col>
-                    <v-col cols="9" class="d-flex align-center">
-                      <v-text-field
-                        type="password"
-                        v-model="input.newPassword2"
-                        variant="outlined"
-                        density="compact"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-card-item>
-                <v-card-actions class="ma-3">
-                  <v-row class="justify-space-between">
-                    <v-btn
-                      color="indigo-darken-3"
-                      variant="tonal"
-                      width="150"
-                      @click="closePasswordDialog"
-                      >취소
-                    </v-btn>
-                    <v-btn
-                      color="indigo-darken-3"
-                      variant="flat"
-                      width="150"
-                      @click="clickModifyPasswordBtn"
-                      >변경
-                    </v-btn>
-                  </v-row>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </v-row>
-        </v-card-text>
-        <v-card-item class="justify-end">
-          <v-dialog
-            v-model="withdrawDialog"
-            persistent
-            width="700"
-            color="indigo"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn variant="tonal" v-bind="props" @click="openWithdrawDialog"
-                >회원 탈퇴
-              </v-btn>
-            </template>
-            <TwoButtonModal
-              question="정말 탈퇴하시겠습니까?"
-              @sendAnswer="closeWithdrawDialog"
-            ></TwoButtonModal>
-          </v-dialog>
-        </v-card-item>
-      </v-card>
-    </v-container>
-  </div>
+  <v-container class="d-flex flex-column align-center">
+    <v-card class="card-area" width="100%" color="indigo" variant="tonal">
+      <v-card-text class="profile-area text-end">
+        <div class="align-center d-flex justify-end mr-2 mb-4">
+          <div class="text-h5 font-weight-bold">
+            {{ profile.name }}
+          </div>
+          <div class="text-subtitle-2 ml-3">
+            {{ profile.role }}
+          </div>
+        </div>
+        <v-btn variant="tonal" @click="moveToModifyProfile"
+          >회원정보 수정
+        </v-btn>
+      </v-card-text>
+      <div class="list-area">
+        <v-btn-toggle v-model="selected" color="indigo" mandatory>
+          <v-btn value="post" @click="viewMyPosts" variant="text">작성글</v-btn>
+          <v-btn value="comment" @click="viewMyComments" variant="text"
+            >작성댓글
+          </v-btn>
+        </v-btn-toggle>
+        <div v-if="selected === 'post'">
+          <MyPostList
+            :posts="posts"
+            @changeCheckedList="setCheckedList"
+            @clickTitle="moveToDetail"
+          ></MyPostList>
+        </div>
+        <div v-if="selected === 'comment'">
+          <MyCommentList
+            :comments="comments"
+            @clickTitle="moveToDetail"
+            @changeCheckedList="setCheckedList"
+          ></MyCommentList>
+        </div>
+      </div>
+      <div class="text-end">
+        <v-btn color="indigo" variant="flat" @click="clickDeleteBtn"
+          >삭제
+        </v-btn>
+      </div>
+      <PaginationBar
+        :page-info="pageInfo"
+        :displayPageCount="10"
+        @handlePage="moveToPage"
+      ></PaginationBar>
+    </v-card>
+  </v-container>
+  <v-dialog v-model="deleteDialog" persistent width="700" color="indigo">
+    <TwoButtonModal
+      :question="getDeleteQuestion()"
+      @sendAnswer="closeDeleteDialog"
+    ></TwoButtonModal>
+  </v-dialog>
 </template>
 
 <script>
-import store from "@/store";
-import { inject, watch, ref } from "vue";
+import { computed, inject, onMounted, ref } from "vue";
 import router from "@/router";
+import PaginationBar from "@/components/PaginationBar.vue";
 import TwoButtonModal from "@/components/modal/TwoButtonModal.vue";
+import MyPostList from "@/components/list/MyPostList.vue";
+import MyCommentList from "@/components/list/MyCommentList.vue";
+import store from "@/store";
 
 export default {
   name: "MyPage",
-  components: { TwoButtonModal },
+  components: { MyCommentList, MyPostList, TwoButtonModal, PaginationBar },
   setup() {
-    let member = store.getters["authStore/getMember"];
     const axios = inject("axios");
-    let input = ref({
-      name: member.name,
-      currentPassword: "",
-      newPassword: "",
-      newPassword2: "",
+    onMounted(() => {
+      fetchPost();
+    });
+    let selected = ref("post");
+    let posts = ref([]);
+    let comments = ref([]);
+    let currentPage = ref(1);
+    let pageInfo = ref({});
+
+    const fetchPost = () => {
+      axios
+        .get("/boards/my/posts", {
+          params: {
+            page: currentPage.value,
+            size: 20,
+          },
+        })
+        .then(res => {
+          posts.value = res.data.data;
+          pageInfo.value = res.data.pageInfo;
+        });
+    };
+
+    const fetchComments = () => {
+      axios
+        .get("/comments/my", {
+          params: {
+            page: currentPage.value,
+            size: 20,
+          },
+        })
+        .then(res => {
+          comments.value = res.data.data;
+          pageInfo.value = res.data.pageInfo;
+        });
+    };
+
+    const profile = computed(() => {
+      if (store.getters["authStore/isAuthenticated"]) {
+        const member = store.getters["authStore/getMember"];
+        return {
+          name: `${member.name}(${member.username})`,
+          role: store.getters["authStore/isAdmin"]
+            ? "관리자 회원"
+            : "일반 회원",
+        };
+      }
+      return {};
     });
 
-    watch(
-      () => member.name,
-      newValue => {
-        input.value.name = newValue;
-      },
-    );
+    const checkedList = ref(null);
 
-    let passwordDialog = ref(false);
-    let openPasswordDialog = () => {
-      passwordDialog.value = true;
-    };
-    let closePasswordDialog = () => {
-      passwordDialog.value = false;
+    const resetCheckList = () => {
+      checkedList.value = null;
     };
 
-    let withdrawDialog = ref(false);
-    let openWithdrawDialog = () => {
-      withdrawDialog.value = true;
+    let isProcessing = ref(false);
+    const startProcessing = () => {
+      isProcessing.value = true;
     };
-    let closeWithdrawDialog = answer => {
-      withdrawDialog.value = false;
-      if (answer) {
-        deleteMember();
-      }
+    const endProcessing = () => {
+      isProcessing.value = false;
     };
 
-    const pattern = {
-      newPassword: {
-        regex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,20}$/,
-        hint: "영문/숫자/특수문자 8-20자리",
-        message: "비밀번호는 영문/숫자/특수문자 8-20자리로 입력해주세요.",
-      },
-      name: {
-        regex: /^[0-9a-zA-Zㄱ-ㅎ가-힣]{2,10}$/,
-        hint: "한글/영문/숫자 2-10자리",
-        message: "닉네임은 한글/영문/숫자 2-10자리로 입력해주세요.",
-      },
+    const submitPostDeleteForm = id => {
+      return axios.delete(`/posts/${id}`);
     };
 
-    const rules = {
-      name: [
-        v => !!v || "닉네임을 입력해주세요.",
-        v => pattern.name.regex.test(v) || pattern.name.message,
-      ],
-      currentPassword: [v => !!v || "비밀번호를 입력해주세요."],
-      newPassword: [
-        v => !!v || "새 비밀번호를 입력해주세요.",
-        v => pattern.newPassword.regex.test(v) || pattern.newPassword.message,
-        v =>
-          v !== input.value.currentPassword ||
-          "새 비밀번호가 기존 비밀번호와 동일합니다.",
-      ],
-      newPassword2: [
-        v => !!v || "새 비밀번호 확인을 입력해주세요.",
-        v =>
-          v === input.value.newPassword ||
-          "새 비밀번호와 동일하게 입력해주세요.",
-      ],
+    const submitCommentDeleteForm = id => {
+      return axios.delete(`/comments/${id}`);
     };
 
-    const validateName = () => {
-      for (let rule of rules.name) {
-        if (rule(input.value.name) !== true) {
-          alert(rule(input.value.name));
-          return false;
-        }
-      }
-      return true;
-    };
-
-    const validatePassword = () => {
-      for (let rule of rules.currentPassword) {
-        if (rule(input.value.currentPassword) !== true) {
-          alert(rule(input.value.currentPassword));
-          return false;
-        }
-      }
-      for (let rule of rules.newPassword) {
-        if (rule(input.value.newPassword) !== true) {
-          alert(rule(input.value.newPassword));
-          return false;
-        }
-      }
-      for (let rule of rules.newPassword2) {
-        if (rule(input.value.newPassword2) !== true) {
-          alert(rule(input.value.newPassword2));
-          return false;
-        }
-      }
-      return true;
-    };
-
-    const clickModifyNameBtn = () => {
-      if (isProcessing) {
-        return;
-      }
-      if (validateName()) {
-        startProcessing();
-        const form = new FormData();
-        form.set("name", input.value.name);
-        axios
-          .patch("/members", form)
-          .then(() => {
-            alert("닉네임 변경을 완료했습니다.");
-            router.go();
-          })
-          .catch(e => {
-            if (e.response.data && e.response.data.message) {
-              alert(e.response.data.message);
-            } else {
-              alert("닉네임 변경을 실패했습니다. 잠시 후 다시 시도해주세요.");
-            }
-          })
-          .finally(() => {
-            endProcessing();
-          });
-      }
-    };
-
-    const clickModifyPasswordBtn = () => {
-      if (isProcessing) {
-        return;
-      }
-      if (validatePassword()) {
-        startProcessing();
-        const form = new FormData();
-        form.set("currentPassword", input.value.currentPassword);
-        form.set("newPassword", input.value.newPassword);
-        axios
-          .put("/members/password", form)
-          .then(() => {
-            alert("비밀번호 변경을 완료했습니다.");
-            closePasswordDialog();
-          })
-          .catch(e => {
-            if (e.response.data && e.response.data.message) {
-              alert(e.response.data.message);
-            } else {
-              alert("비밀번호 변경을 실패했습니다. 잠시 후 다시 시도해주세요.");
-            }
-          })
-          .finally(() => {
-            endProcessing();
-          });
-      }
-    };
-
-    const deleteMember = () => {
-      if (isProcessing) {
-        return;
-      }
+    const deletePosts = () => {
       startProcessing();
-      axios
-        .delete("/members")
+      const promises = checkedList.value.map(submitPostDeleteForm);
+      Promise.all(promises)
         .then(() => {
-          alert("회원 탈퇴되었습니다.");
-        })
-        .catch(e => {
-          if (e.response.data && e.response.data.message) {
-            alert(e.response.data.message);
-          } else {
-            alert("회원 탈퇴를 실패했습니다. 잠시 후 다시 시도해주세요.");
-          }
+          fetchComments();
         })
         .finally(() => {
+          resetCheckList();
+          endProcessing();
+        });
+    };
+    const deleteComments = () => {
+      startProcessing();
+      const promises = checkedList.value.map(submitCommentDeleteForm);
+      Promise.all(promises)
+        .then(() => {
+          fetchComments();
+        })
+        .finally(() => {
+          resetCheckList();
           endProcessing();
         });
     };
 
-    let isProcessing = false;
-    const startProcessing = () => {
-      isProcessing = true;
+    const viewMyPosts = () => {
+      selected.value = "post";
+      currentPage.value = 1;
+      resetCheckList();
+      fetchPost();
     };
 
-    const endProcessing = () => {
-      isProcessing = false;
+    const viewMyComments = () => {
+      selected.value = "comment";
+      currentPage.value = 1;
+      resetCheckList();
+      fetchComments();
+    };
+
+    const moveToPage = page => {
+      resetCheckList();
+      currentPage.value = page;
+      if (selected.value === "post") {
+        fetchPost();
+      } else if (selected.value === "comment") {
+        fetchComments();
+      }
+    };
+
+    const setCheckedList = list => {
+      checkedList.value = list;
+    };
+
+    const moveToDetail = id => {
+      router.push(`/portal/${id}`);
+    };
+
+    const moveToModifyProfile = () => {
+      router.push("/profile/modify");
+    };
+
+    let deleteDialog = ref(false);
+    const getDeleteQuestion = () => {
+      switch (selected.value) {
+        case "post":
+          return "선택한 게시글을 삭제하시겠습니까?";
+        case "comment":
+          return "선택한 댓글을 삭제하시겠습니까?";
+      }
+      return "";
+    };
+
+    const clickDeleteBtn = () => {
+      if (isProcessing.value) {
+        return;
+      }
+      if (!checkedList.value || checkedList.value.length === 0) {
+        alert("삭제할 항목을 선택해주세요.");
+      } else {
+        deleteDialog.value = true;
+      }
+    };
+
+    const closeDeleteDialog = answer => {
+      deleteDialog.value = false;
+      if (answer) {
+        switch (selected.value) {
+          case "post":
+            deletePosts();
+            break;
+          case "comment":
+            deleteComments();
+            break;
+        }
+      }
     };
 
     return {
-      member,
-      input,
-      pattern,
-      rules,
-      passwordDialog,
-      withdrawDialog,
-      clickModifyNameBtn,
-      clickModifyPasswordBtn,
-      openPasswordDialog,
-      closePasswordDialog,
-      openWithdrawDialog,
-      closeWithdrawDialog,
+      posts,
+      comments,
+      profile,
+      selected,
+      pageInfo,
+      viewMyPosts,
+      viewMyComments,
+      moveToPage,
+      moveToDetail,
+      moveToModifyProfile,
+      setCheckedList,
+      deleteDialog,
+      getDeleteQuestion,
+      clickDeleteBtn,
+      closeDeleteDialog,
     };
   },
 };
 </script>
+
 <style scoped>
 .card-area {
-  margin-top: 100px;
+  margin-top: 30px;
   padding: 30px;
 }
 
-.v-card-title {
-  margin-bottom: 50px;
-}
-
-.dialog-item-area {
+.list-area {
   margin-bottom: 20px;
 }
 </style>

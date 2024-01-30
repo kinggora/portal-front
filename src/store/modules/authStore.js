@@ -23,7 +23,7 @@ export const authStore = {
       return state.member;
     },
     isAdmin(state) {
-      if (state.member.roles) {
+      if (state.member && state.member.roles) {
         for (let role of state.member.roles) {
           if (role === "ADMIN") {
             return true;
@@ -35,14 +35,12 @@ export const authStore = {
   },
   mutations: {
     setMember(state, payload) {
-      console.log("setMember", payload);
       state.member.id = payload.id;
       state.member.username = payload.username;
       state.member.name = payload.name;
       state.member.roles = payload.roles;
     },
     setAuthenticated(state, status) {
-      console.log("setAuthenticated", status);
       state.isAuthenticated = status;
     },
     resetState(state) {

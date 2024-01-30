@@ -1,5 +1,4 @@
 import AxiosInstance from "@/utils/AxiosInstance";
-import router from "@/router";
 
 export const postStore = {
   namespaced: true,
@@ -27,7 +26,6 @@ export const postStore = {
           switch (error.response.status) {
             case 404:
               alert("존재하지 않는 게시글입니다.");
-              router.push("/").catch(() => {});
               break;
           }
         });

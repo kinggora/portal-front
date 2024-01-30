@@ -7,8 +7,9 @@ import BoardDetail from "@/views/boards/BoardDetail.vue";
 import BoardList from "@/views/boards/BoardList.vue";
 import store from "@/store";
 import SignIn from "@/views/member/SignIn.vue";
-import MyPage from "@/views/member/MyPage.vue";
+import ModifyProfile from "@/views/member/ModifyProfile.vue";
 import MainHome from "@/views/boards/MainHome.vue";
+import MyPage from "@/views/member/MyPage.vue";
 
 const routes = [
   {
@@ -98,6 +99,23 @@ const routes = [
           }
         },
       },
+      {
+        path: "profile/modify",
+        name: "ModifyProfile",
+        component: ModifyProfile,
+        beforeEnter: (to, from, next) => {
+          if (!store.getters["authStore/isAuthenticated"]) {
+            next({
+              path: "/login",
+              query: {
+                returnUrl: to.fullPath,
+              },
+            });
+          } else {
+            next();
+          }
+        },
+      },
     ],
   },
 ];
@@ -155,8 +173,6 @@ router.beforeEach((to, from, next) => {
       let post = store.getters["postStore/getPost"];
       let permission = to.meta["permission"];
       const accessLevel = post.boardInfo[permission];
-      console.log(post);
-      console.log(permission);
       authorizationAccess(accessLevel, to, next);
     });
   } else {

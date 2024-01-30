@@ -8,7 +8,7 @@
         variant="outlined"
         :min="minDate"
         :max="maxDate"
-        v-model="searchCriteria.startDate"
+        v-model="boardSearchParam.startDate"
       ></v-text-field>
     </v-col>
     <v-sheet class="pa-4">~</v-sheet>
@@ -19,7 +19,7 @@
         variant="outlined"
         :min="minDate"
         :max="maxDate"
-        v-model="searchCriteria.endDate"
+        v-model="boardSearchParam.endDate"
       ></v-text-field>
     </v-col>
     <v-spacer></v-spacer>
@@ -32,7 +32,7 @@
         item-title="name"
         item-value="id"
         label="카테고리 선택"
-        v-model="searchCriteria.categoryId"
+        v-model="boardSearchParam.categoryId"
       >
       </v-select>
     </v-col>
@@ -41,7 +41,7 @@
         density="compact"
         variant="outlined"
         single-line
-        v-model="searchCriteria.searchWord"
+        v-model="boardSearchParam.searchWord"
       ></v-text-field>
     </v-col>
     <v-col cols="1">
@@ -61,7 +61,7 @@ export default {
     const minDate = "1970-01-01";
     const maxDate = new Date().toISOString().split("T")[0];
 
-    let searchCriteria = ref({
+    let boardSearchParam = ref({
       startDate: props.criteria.startDate,
       endDate: props.criteria.endDate,
       categoryId: props.criteria.categoryId,
@@ -69,10 +69,10 @@ export default {
     });
 
     const search = () => {
-      emit("searchEvent", searchCriteria.value);
+      emit("searchEvent", boardSearchParam.value);
     };
 
-    return { minDate, maxDate, searchCriteria, search };
+    return { minDate, maxDate, boardSearchParam, search };
   },
 };
 </script>
