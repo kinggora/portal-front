@@ -32,7 +32,6 @@ export const boardInfoStore = {
           commit("setBoardInfo", res.data);
         })
         .catch(error => {
-          console.log(error);
           switch (error.response.status) {
             case 404:
               router.push("/").catch(() => {});

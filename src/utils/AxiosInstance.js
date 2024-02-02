@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cookies from "@/utils/CookieService";
 import store from "@/store";
-import router from "@/router";
 
 const createInstance = () => {
   const axiosInstance = axios.create({
@@ -34,16 +33,7 @@ const setInterceptors = instance => {
         console.log(error.response);
         switch (error.response.status) {
           case 401:
-            store.dispatch("authStore/logout").then(() => {
-              router.push("/login").catch(() => {});
-            });
-            break;
-          case 403:
-            if (store.getters["authStore/isAuthenticated"]) {
-              alert("권한이 없습니다.");
-            } else {
-              router.push("/login").catch(() => {});
-            }
+            store.dispatch("authStore/logout").then(() => {});
             break;
         }
       }

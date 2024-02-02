@@ -15,7 +15,7 @@
             @change="changeCheckedList"
           ></v-checkbox-btn>
         </td>
-        <td class="td-title pt-2 pb-2" style="width: 90%">
+        <td class="list-item pb-2 pt-2">
           <a
             :style="{
               'text-decoration-line': hoverTitle === index ? 'underline' : '',
@@ -93,7 +93,7 @@ export default {
 </script>
 
 <style scoped>
-td {
-  padding-top: 20px;
+.list-item {
+  word-break: break-all;
 }
 </style>

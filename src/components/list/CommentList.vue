@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card>
-      <v-table style="word-break: break-all">
+      <v-table>
         <tbody>
           <!-- 댓글 리스트 -->
           <template v-for="(comment, index) in comments" :key="index">
@@ -51,7 +51,6 @@ export default {
     postId: {
       type: Number,
       required: true,
-      default: null,
     },
     comments: {
       type: Array,

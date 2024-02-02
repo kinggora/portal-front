@@ -127,21 +127,6 @@ export default {
     TwoButtonModal,
     TitleHeader,
   },
-  beforeRouteEnter: (to, from, next) => {
-    let post = store.getters["postStore/getPost"];
-    if (post == null) {
-      return;
-    }
-    if (!post.secret) {
-      return next();
-    }
-    let writerId = post.member["username"];
-    let loggedInId = store.getters["authStore/getMember"]["username"];
-    if (writerId === loggedInId || store.getters["authStore/isAdmin"]) {
-      return next();
-    }
-    alert("비밀글은 작성자만 열람 가능합니다.");
-  },
   setup() {
     const axios = inject("axios");
     const route = new useRoute();

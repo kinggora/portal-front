@@ -141,6 +141,7 @@ export default {
   padding-top: 15px;
   padding-bottom: 15px;
   padding-left: 30px;
+  word-break: break-all;
 }
 
 .list-area {
